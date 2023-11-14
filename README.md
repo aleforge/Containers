@@ -37,4 +37,4 @@ these images on an arm system, no modification to them or the tag is needed, the
   * `ghcr.io/aleforge/containers:graalvm-jdk21`
 
 ## Sponsor :
-[![AleForge](https://github.com/aleforge/Containers/blob/98083fcd752912b8cb2b243cca3b2612726c189f/images/aleforge-logo-dark.png)](https://aleforge.net)
+[![AleForge](https://github.com/aleforge/Containers/blob/98083fcd752912b8cb2b243cca3b2612726c189f/images/aleforge-logo-dark.jpg)](https://aleforge.net)
