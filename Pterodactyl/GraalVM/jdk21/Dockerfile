@@ -2,16 +2,15 @@ FROM --platform=$TARGETOS/$TARGETARCH amd64/debian
 
 LABEL author="Louis Ravignot Dos Santos" maintainer="louis.rds@akticube.fr"
 LABEL org.opencontainers.image.source="https://github.com/AktiCube/containers/"
-LABEL org.opencontainers.image.description="A Docker image to run GraalVM JDK 11 on Pterodactyl" 
+LABEL org.opencontainers.image.description="A Docker image to run GraalVM JDK 21 on Pterodactyl" 
 
 # Linux things
 ARG DEBIAN_FRONTEND=noninteractive
 
-# Installing GraalVM JDK 11
-ARG GRAALVM_VERSION=22.3.2
-ARG JAVA_VERSION=java11
-ARG GRAALVM_PKG=https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-${GRAALVM_VERSION}/graalvm-ce-${JAVA_VERSION}-linux-amd64-${GRAALVM_VERSION}.tar.gz
-ARG GRAALVM_FOLDER_NAME=graalvm-ce-${JAVA_VERSION}-${GRAALVM_VERSION}
+# Installing GraalVM JDK 21
+ARG GRAALVM_VERSION=21.0.0
+ARG GRAALVM_PKG=https://github.com/graalvm/graalvm-ce-builds/releases/download/jdk-${GRAALVM_VERSION}/graalvm-community-jdk-${GRAALVM_VERSION}_linux-x64_bin.tar.gz
+ARG GRAALVM_FOLDER_NAME=graalvm-community-openjdk-21+35.1
 
 RUN apt-get update -y \
     && apt-get upgrade -y \
@@ -46,5 +45,5 @@ USER container
 ENV USER=container HOME=/home/container
 WORKDIR /home/container
 
-COPY ./../../entrypoint.sh /entrypoint.sh
+COPY ./../entrypoint.sh /entrypoint.sh
 CMD [ "/bin/bash", "/entrypoint.sh" ]
