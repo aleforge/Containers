@@ -42,9 +42,9 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
-          context: ./Pterodactyl
-          file: ./Pterodactyl/GraalVM/${{ matrix.version }}/Dockerfile
+          context: ./Java
+          file: ./Java/GraalVM/${{ matrix.version }}/Dockerfile
           platforms: linux/amd64
           push: true
           tags: |
-            ghcr.io/aleforge/containers:aleforge-graalvm-${{ matrix.version }}
+            ghcr.io/aleforge/containers:graalvm-${{ matrix.version }}
