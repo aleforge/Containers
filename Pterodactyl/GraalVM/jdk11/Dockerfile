@@ -1,8 +1,8 @@
 FROM --platform=$TARGETOS/$TARGETARCH amd64/debian
 
-LABEL author="Louis Ravignot Dos Santos" maintainer="louis.rds@akticube.fr"
-LABEL org.opencontainers.image.source="https://github.com/AktiCube/containers/"
-LABEL org.opencontainers.image.description="A Docker image to run GraalVM JDK 11 on Pterodactyl" 
+LABEL author="AleForge Support" maintainer="support@mail.aleforge.net"
+LABEL org.opencontainers.image.source="https://github.com/aleforge/containers/"
+LABEL org.opencontainers.image.description="A Docker image to run GraalVM JDK 11 on AleForge Panel (https://panel.aleforge.net)" 
 
 # Linux things
 ARG DEBIAN_FRONTEND=noninteractive
