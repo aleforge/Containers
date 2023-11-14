@@ -11,7 +11,7 @@ on:
 
 jobs:
   push:
-    name: "Pterodactyl-GraalVM-${{ matrix.version }}"
+    name: "AleForge-GraalVM-${{ matrix.version }}"
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -47,4 +47,4 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: |
-            ghcr.io/aleforge/containers:pterodactyl-graalvm-${{ matrix.version }}
+            ghcr.io/aleforge/containers:aleforge-graalvm-${{ matrix.version }}
