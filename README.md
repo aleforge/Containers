@@ -19,6 +19,11 @@ these images on an arm system, no modification to them or the tag is needed, the
 
 ## Available images:
 
+### [Games](/games)
+
+* [`Holdfast`](/games/holdfastnaw)
+  * `ghcr.io/aleforge/games:holdfastnaw`
+
 ### [Java](/java)
 
 #### [GraalVM](/java/GraalVM)

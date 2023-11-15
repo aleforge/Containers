@@ -1,7 +1,3 @@
-# ----------------------------------
-# Environment: ubuntu
-# Minimum Panel Version: 0.7.X
-# ----------------------------------
 FROM  ubuntu:18.04
 
 LABEL author="AleForge Support" maintainer="support@mail.aleforge.net"
