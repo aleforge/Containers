@@ -43,7 +43,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./games
-          file: ./${{ matrix.version }}/Dockerfile
+          file: ./games/${{ matrix.version }}/Dockerfile
           platforms: linux/amd64
           push: true
           tags: |
