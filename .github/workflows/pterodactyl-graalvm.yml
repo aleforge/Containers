@@ -5,7 +5,7 @@ on:
     branches: 
       - main
     paths:
-      - GraalVM/**
+      - Java/GraalVM/**
   workflow_dispatch:
   schedule:
     - cron: "0 0 * * 1"
