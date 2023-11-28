@@ -8,7 +8,7 @@ LABEL org.opencontainers.image.description="A Docker image to run GraalVM EE JDK
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Installing GraalVM EE JDK 11
-ARG GRAALVM_VERSION=22.3.2
+ARG GRAALVM_VERSION=22.3.4
 ARG JAVA_VERSION=java11
 ARG GRAALVM_PKG=https://f000.backblazeb2.com/file/AleForge-public-Data/java/graalvm/graalvm-ee-${JAVA_VERSION}-linux-amd64-${GRAALVM_VERSION}.tar.gz#
 #ARG GRAALVM_PKG=https://akticu.be/GraalVM/graalvm-ee-${JAVA_VERSION}-linux-amd64-${GRAALVM_VERSION}.tar.gz
