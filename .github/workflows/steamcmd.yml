@@ -1,4 +1,4 @@
-name: build steamcmd
+name: Images for SteamCMD Games
 
 on:
   push:
