@@ -1,14 +1,14 @@
 name: build steamcmd
 
 on:
-    push:
-      branches: 
-        - main
-      paths:
-        - steamcmd/**
-    workflow_dispatch:
-    schedule:
-      - cron: "0 0 * * 1"
+  push:
+    branches: 
+      - main
+    paths:
+      - steamcmd/**
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * 1"
 jobs:
   push:
     name: "AleForge-${{ matrix.version }}"
