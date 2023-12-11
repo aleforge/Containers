@@ -37,4 +37,4 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: |
-            ghcr.io/parkervcp/steamcmd:${{ matrix.distro }}
+            ghcr.io/aleforge/steamcmd:${{ matrix.distro }}
