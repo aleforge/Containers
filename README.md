@@ -23,6 +23,8 @@ these images on an arm system, no modification to them or the tag is needed, the
 
 * [`Holdfast`](/games/holdfastnaw)
   * `ghcr.io/aleforge/games:holdfastnaw`
+* [`Rust`](/games/rust)
+  * `ghcr.io/aleforge/games:rust`
 
 ### [Java](/java)
 
