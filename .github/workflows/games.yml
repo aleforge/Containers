@@ -23,6 +23,7 @@ jobs:
       matrix:
         version:
           - holdfastnaw
+          - rust
     steps:
       - uses: actions/checkout@v3
       - name: Set up QEMU
