@@ -46,7 +46,7 @@ jobs:
         with:
           context: ./oses/${{ matrix.version }}
           file: ./oses/${{ matrix.version }}/Dockerfile
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: |
             ghcr.io/aleforge/base:${{ matrix.version }}
