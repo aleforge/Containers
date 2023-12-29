@@ -38,9 +38,9 @@ jobs:
         - name: Build and push
           uses: docker/build-push-action@v5
           with:
-            context: ./oses/${{ matrix.version }}
-            file: ./oses/${{ matrix.version }}/Dockerfile
+            context: ./oses/${{ matrix.oses }}
+            file: ./oses/${{ matrix.oses }}/Dockerfile
             platforms: linux/amd64
             push: true
             tags: |
-              ghcr.io/aleforge/base:${{ matrix.version }}
+              ghcr.io/aleforge/base:${{ matrix.oses }}
