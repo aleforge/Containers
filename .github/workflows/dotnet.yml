@@ -1,4 +1,4 @@
-name: Build Dotnet
+name: Dotnet
 on:
   workflow_dispatch:
   schedule:

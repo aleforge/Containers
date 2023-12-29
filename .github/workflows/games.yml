@@ -1,4 +1,4 @@
-name: Pterodactyl Games
+name: Games Specific Images
 
 on:
   push:

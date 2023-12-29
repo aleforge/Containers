@@ -1,4 +1,4 @@
-name: Images for SteamCMD Games
+name: SteamCMD Games
 
 on:
   push:

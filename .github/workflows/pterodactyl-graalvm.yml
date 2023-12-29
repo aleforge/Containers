@@ -1,4 +1,4 @@
-name: Images for Pterodactyl GraalVM
+name: Java GraalVM
 
 on:
   push:
