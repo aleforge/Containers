@@ -19,6 +19,20 @@ these images on an arm system, no modification to them or the tag is needed, the
 
 ## Available images:
 
+### [Oses](/oses)
+
+* [alpine](/oses/alpine)
+  * `ghcr.io/aleforge/base:alpine`
+* [debian](/oses/debian)
+  * `ghcr.io/aleforge/base:debian`
+* [ubuntu](/oses/ubuntu)
+  * `ghcr.io/aleforge/base:ubuntu`
+
+### [dotNet](/dotnet)
+
+* [`dotnet6.0`](/dotnet/6)
+  * `ghcr.io/aleforge/dotnet:6`
+
 ### [Games](/games)
 
 * [`Holdfast`](/games/holdfastnaw)
