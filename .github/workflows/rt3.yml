@@ -10,7 +10,7 @@ on:
         - RT3/**
 jobs:
   push:
-    name: "AleForge-${{ matrix.version }}"
+    name: "AleForge-RT3-${{ matrix.version }}"
     runs-on: ubuntu-latest
     permissions:
         contents: read
@@ -39,9 +39,9 @@ jobs:
     - name: Build and push
       uses: docker/build-push-action@v5
       with:
-        context: ./RT3/
+        context: ./RT3/${{ matrix.version }}
         file: ./RT3/${{ matrix.version }}/Dockerfile
-        platforms: linux/amd64
+        platforms: linux/amd64,linux/arm64
         push: true
         tags: |
             ghcr.io/aleforge/steamrt3:${{ matrix.version }}
