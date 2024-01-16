@@ -58,7 +58,7 @@ these images on an arm system, no modification to them or the tag is needed, the
   * `ghcr.io/aleforge/containers:graalvm-jdk21`
 
 ### [SteamCMD](/steamcmd)
-* [`SteamCMD Debian lastest`](/steamcmd/debian)
+* [`SteamCMD Debian Latest`](/steamcmd/debian)
   * `ghcr.io/aleforge/steamcmd:debian`
 * [`SteamCMD Debian Dotnet`](/steamcmd/dotnet)
   * `ghcr.io/aleforge/steamcmd:dotnet`
@@ -68,8 +68,10 @@ these images on an arm system, no modification to them or the tag is needed, the
   * `ghcr.io/aleforge/steamcmd:ubuntu`
 
 ### [SteamRT3](/RT3)
-* [`Steam Runtime 3 lastest`](/rt3/latest)
+* [`Steam Runtime 3 Latest`](/rt3/latest)
   * `ghcr.io/aleforge/steamrt3:latest`
+* [`Steam Runtime 3 Latest`](/rt3/beta)
+  * `ghcr.io/aleforge/steamrt3:beta`
 
 ## Sponsor :
 [![AleForge](https://github.com/aleforge/Containers/blob/7b152c2d6b0bbbdaa759778d3f398a5d9dffc237/images/aleforge-logo-dark.jpg)](https://aleforge.net)
