@@ -1,4 +1,4 @@
-name: Build RT3
+name: Build SteamRT3
 on:
     workflow_dispatch:
     schedule:
