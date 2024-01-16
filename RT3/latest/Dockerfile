@@ -19,5 +19,7 @@ WORKDIR     /home/container
 # RUN         apt install -y wine wine64 libwine && apt clean
 
 # EP
-COPY        ./docker/entrypoint.sh /entrypoint.sh
+COPY        --chown=container:container ./entrypoint.sh /entrypoint.sh
+RUN         chmod +x /entrypoint.sh
+ENTRYPOINT    ["/usr/bin/tini", "-g", "--"]
 CMD         [ "/bin/bash", "/entrypoint.sh" ]

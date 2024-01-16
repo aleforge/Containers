@@ -19,7 +19,7 @@ jobs:
         fail-fast: false
         matrix:
             version:
-            - RT3
+            - latest
     steps:
     - uses: actions/checkout@v3
     - name: Set up QEMU
@@ -39,9 +39,9 @@ jobs:
     - name: Build and push
       uses: docker/build-push-action@v5
       with:
-        context: .
-        file: ./Dockerfile
+        context: ./RT3/
+        file: ./RT3/${{ matrix.version }}/Dockerfile
         platforms: linux/amd64
         push: true
         tags: |
-            ghcr.io/aleforge/steamrt3:latest
+            ghcr.io/aleforge/steamrt3:${{ matrix.version }}
