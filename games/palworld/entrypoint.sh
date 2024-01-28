@@ -81,10 +81,10 @@ fi
 
 ## Edit Variables
 ls -ltr
-sed -i "s/RCONEnabled=[a-zA-Z]*/RCONEnabled=true/" /Pal/Saved/Config/LinuxServer/PalWorldSettings.ini
+sed -i "s/RCONEnabled=[a-zA-Z]*/RCONEnabled=true/" Pal/Saved/Config/LinuxServer/PalWorldSettings.ini
 if [ -n "${RCON_PORT}" ]; then
     echo "RCON_PORT=${RCON_PORT}"
-    sed -i "s/RCONPort=[0-9]*/RCONPort=$RCON_PORT/" /Pal/Saved/Config/LinuxServer/PalWorldSettings.ini
+    sed -i "s/RCONPort=[0-9]*/RCONPort=$RCON_PORT/" Pal/Saved/Config/LinuxServer/PalWorldSettings.ini
 fi
 
 # Replace Startup Variables
