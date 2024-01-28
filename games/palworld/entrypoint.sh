@@ -82,6 +82,9 @@ fi
 ## Edit Variables
 ls -ltr
 sed -i "s/RCONEnabled=[a-zA-Z]*/RCONEnabled=True/" Pal/Saved/Config/LinuxServer/PalWorldSettings.ini
+if [ -n "${SRV_PASSWORD}" ]; then
+    sed -i "s/ServerPassword=[a-zA-Z0-9]*/ServerPassword=$SRV_PASSWORD/" Pal/Saved/Config/LinuxServer/PalWorldSettings.ini
+fi
 if [ -n "${RCON_PORT}" ]; then
     echo "RCON_PORT=${RCON_PORT}"
     sed -i "s/RCONPort=[0-9]*/RCONPort=$RCON_PORT/" Pal/Saved/Config/LinuxServer/PalWorldSettings.ini
