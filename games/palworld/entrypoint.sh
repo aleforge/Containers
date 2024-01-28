@@ -83,7 +83,7 @@ fi
 ls -ltr
 sed -i "s/RCONEnabled=[a-zA-Z]*/RCONEnabled=True/" Pal/Saved/Config/LinuxServer/PalWorldSettings.ini
 if [ -n "${SRV_PASSWORD}" ]; then
-    sed -i "s/AdminPassword=[a-zA-Z0-9]*/AdminPassword=$SRV_PASSWORD/" Pal/Saved/Config/LinuxServer/PalWorldSettings.ini
+    sed -i "s/AdminPassword=[a-zA-Z0-9]*/AdminPassword="$SRV_PASSWORD"/" Pal/Saved/Config/LinuxServer/PalWorldSettings.ini
 fi
 if [ -n "${RCON_PORT}" ]; then
     echo "RCON_PORT=${RCON_PORT}"
