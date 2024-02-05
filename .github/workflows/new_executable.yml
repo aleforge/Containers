@@ -17,7 +17,6 @@ jobs:
               with:
                 repository: 'VeroFess/PalWorld-Server-Unoffical-Api'
                 ref: main
-            - uses: moonrepo/setup-rust@v1
             - name: Get current date
               id: date
               run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
@@ -29,6 +28,9 @@ jobs:
             - uses: xmake-io/github-action-setup-xmake@v1
               with:
                 xmake-version: latest
+            - name: Build Binary
+              run: |
+                git submodule update --init --recursive
             - name: Debugging
               run: |
                 ls -ltr .
