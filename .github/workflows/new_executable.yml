@@ -28,9 +28,12 @@ jobs:
             - uses: xmake-io/github-action-setup-xmake@v1
               with:
                 xmake-version: latest
-            - name: Build Binary
+            - name: Git Submodules
               run: |
                 git submodule update --init --recursive
+            - name: Build Binary
+              run: |
+                xmake -y
             - name: Debugging
               run: |
                 ls -ltr .
