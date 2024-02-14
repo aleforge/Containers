@@ -73,5 +73,13 @@ these images on an arm system, no modification to them or the tag is needed, the
 * [`Steam Runtime 3 Latest`](/rt3/beta)
   * `ghcr.io/aleforge/steamrt3:beta`
 
+### [Wine](/wine)
+
+* [`Wine`](/wine)
+  * `ghcr.io/aleforge/wine:latest`
+  * `ghcr.io/aleforge/wine:devel`
+  * `ghcr.io/aleforge/wine:staging`
+  * `ghcr.io/aleforge/wine:8`
+
 ## Sponsor :
 [![AleForge](https://github.com/aleforge/Containers/blob/7b152c2d6b0bbbdaa759778d3f398a5d9dffc237/images/aleforge-logo-dark.jpg)](https://aleforge.net)
