@@ -1,10 +1,12 @@
 # ---------------------------------------
 # Generic Wine image based on Wine devel 
 # ---------------------------------------
-FROM            ghcr.io/parkervcp/yolks:debian
+FROM            ghcr.io/aleforge/base:debian
 
-LABEL           author="Michael Parker" maintainer="parker@pterodactyl.io"
-LABEL           org.opencontainers.image.licenses=MIT
+LABEL       author="AleForge" maintainer="info@aleforge.net"
+
+LABEL       org.opencontainers.image.source="https://github.com/aleforge/containers"
+LABEL       org.opencontainers.image.licenses=MIT
 
 ## install required packages
 RUN             dpkg --add-architecture i386 \
