@@ -64,6 +64,8 @@ these images on an arm system, no modification to them or the tag is needed, the
   * `ghcr.io/aleforge/steamcmd:dotnet`
 * [`SteamCMD Proton`](/steamcmd/proton)
   * `ghcr.io/aleforge/steamcmd:proton`
+ [`SteamCMD Proton`](/steamcmd/proton8)
+  * `ghcr.io/aleforge/steamcmd:proton8`
 * [`SteamCMD Ubuntu latest LTS`](/steamcmd/ubuntu)
   * `ghcr.io/aleforge/steamcmd:ubuntu`
 
