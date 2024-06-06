@@ -11,7 +11,7 @@ on:
       - mariadb/**
 jobs:
   push:
-    name: "yolks:mariadb_${{ matrix.tag }}"
+    name: "MariaDB-${{ matrix.tag }}"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -44,4 +44,4 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            ghcr.io/aleforge/proton:${{ matrix.tag }}
+            ghcr.io/aleforge/Mariadb:${{ matrix.tag }}
