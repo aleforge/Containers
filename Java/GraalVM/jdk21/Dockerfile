@@ -14,7 +14,7 @@ ARG GRAALVM_FOLDER_NAME=graalvm-community-openjdk-${GRAALVM_VERSION}+12.1
 
 RUN apt-get update -y \
     && apt-get upgrade -y \
-    && apt-get install -y lsof curl ca-certificates openssl git tar sqlite3 fontconfig libfreetype6 tzdata iproute2 libstdc++6 locales locales-all font-manager
+    && apt-get install -y lsof curl ca-certificates openssl git tar sqlite3 fontconfig libfreetype6 tzdata iproute2 libstdc++6 locales locales-all font-manager --no-install-recommends
 
 # Setting the language
 RUN echo "Setting the language..."
@@ -29,7 +29,7 @@ RUN cd /usr/local/ \
     && echo "Extracting GraalVM..." && tar -xzf /tmp/graalvm.tar.gz \
     && echo "Delete temp file..." && rm /tmp/graalvm.tar.gz
 
-RUN echo "Mooving GraalVM..." && mkdir /usr/local/graalvm && mv /usr/local/${GRAALVM_FOLDER_NAME}/* /usr/local/graalvm && rm -rf /usr/local/${GRAALVM_FOLDER_NAME}
+RUN echo "Moving GraalVM..." && mkdir /usr/local/graalvm && mv /usr/local/${GRAALVM_FOLDER_NAME}/* /usr/local/graalvm && rm -rf /usr/local/${GRAALVM_FOLDER_NAME}
 
 RUN echo "Setting GraalVM environment variables..."
 ENV JAVA_HOME=/usr/local/graalvm

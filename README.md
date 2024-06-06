@@ -55,6 +55,25 @@ because these images are tuned to work with our platform and may not function ou
 - [`java21`](/GraalVM/jdk21)
   - `ghcr.io/aleforge/containers:graalvm-jdk21`
 
+### [MariaDB](/mariadb)
+
+- [`MariaDB 10.3`](/mariadb/10.3)
+  - `ghcr.io/aleforge/proton:10.3`
+- [`MariaDB 10.4`](/mariadb/10.4)
+  - `ghcr.io/aleforge/proton:10.4`
+- [`MariaDB 10.5`](/mariadb/10.5)
+  - `ghcr.io/aleforge/proton:10.5`
+- [`MariaDB 10.6`](/mariadb/10.6)
+  - `ghcr.io/aleforge/proton:10.6`
+- [`MariaDB 10.7`](/mariadb/10.7)
+  - `ghcr.io/aleforge/proton:10.7`
+- [`MariaDB 11.2`](/mariadb/11.2)
+  - `ghcr.io/aleforge/proton:11.2`
+- [`MariaDB 11.3`](/mariadb/11.3)
+  - `ghcr.io/aleforge/proton:11.3`
+- [`MariaDB 11.4`](/mariadb/11.4)
+  - `ghcr.io/aleforge/proton:11.4`
+
 ### [SteamCMD](/steamcmd)
 
 - [`SteamCMD Debian Latest`](/steamcmd/debian)
