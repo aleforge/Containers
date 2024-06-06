@@ -9,5 +9,8 @@ export INTERNAL_IP
 MODIFIED_STARTUP=$(echo ${STARTUP} | sed -e 's/{{/${/g' -e 's/}}/}/g')
 echo ":/home/container$ ${MODIFIED_STARTUP}"
 
+# Set Correct Permissions on my.cnf
+chmod 700 .my.cnf
+
 # Run the Server
 eval ${MODIFIED_STARTUP}
