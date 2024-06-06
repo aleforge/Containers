@@ -11,8 +11,7 @@ echo ":/home/container$ ${MODIFIED_STARTUP}"
 
 # Set Correct Permissions on my.cnf
 chmod 700 .my.cnf
-chown -R mysql:root /run/
-fsck -n -f
+chown 999:999 run
 
 # Run the Server
 eval ${MODIFIED_STARTUP}
