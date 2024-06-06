@@ -10,7 +10,7 @@
     ENV         DEBIAN_FRONTEND noninteractive
     
     RUN         apt update -y \
-                && apt install -y netcat mysql-client \
+                && apt install -y netcat \
                 && useradd -d /home/container -m container -s /bin/bash
     
     USER        container
