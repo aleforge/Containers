@@ -19,11 +19,11 @@ jobs:
       fail-fast: false
       matrix:
         tag:
-#          - 2.1
-#          - 3.1
-#          - 5
-#          - 6
-#          - 7
+          - 2.1
+          - 3.1
+          - 5
+          - 6
+          - 7
           - 8
     steps:
       - uses: actions/checkout@v4
@@ -50,11 +50,3 @@ jobs:
           push: true
           tags: |
             ghcr.io/aleforge/dotnet:${{ matrix.tag }}
-      - name: Fat Camp
-        uses: kitabisa/docker-slim-action@v1
-        env:
-          DSLIM_HTTP_PROBE: false
-        with:
-          target: ghcr.io/aleforge/dotnet:${{ matrix.tag }}
-          tag: ${{ matrix.tag }}-slim
-      - run: docker image push ghcr.io/aleforge/dotnet:${{ matrix.tag }}-slim
