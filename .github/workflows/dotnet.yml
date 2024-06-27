@@ -56,5 +56,5 @@ jobs:
           DSLIM_HTTP_PROBE: false
         with:
           target: ghcr.io/aleforge/dotnet:${{ matrix.tag }}
-          tag: ghcr.io/aleforge/dotnet:${{ matrix.tag }}-slim
+          tag: ${{ matrix.tag }}-slim
       - run: docker image push ghcr.io/aleforge/dotnet:${{ matrix.tag }}-slim
