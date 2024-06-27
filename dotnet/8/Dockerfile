@@ -1,4 +1,4 @@
-FROM        --platform=$TARGETOS/$TARGETARCH ghcr.io/aleforge/base:debian-slim
+FROM        --platform=$TARGETOS/$TARGETARCH ghcr.io/aleforge/base:debian
 
 LABEL       author="AleForge" maintainer="support@mail.aleforge.net"
 

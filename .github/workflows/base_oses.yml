@@ -50,11 +50,3 @@ jobs:
           push: true
           tags: |
             ghcr.io/aleforge/base:${{ matrix.version }}
-      - name: Fat Camp
-        uses: kitabisa/docker-slim-action@v1
-        env:
-          DSLIM_HTTP_PROBE: false
-        with:
-          target: ghcr.io/aleforge/base:${{ matrix.version }}
-          tag: ${{ matrix.version }}-slim
-      - run: docker image push ghcr.io/aleforge/base:${{ matrix.version }}-slim
