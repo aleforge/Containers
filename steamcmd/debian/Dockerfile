@@ -19,8 +19,6 @@ RUN         cd /tmp/ \
             && tar xvf rcon.tar.gz \
             && mv rcon-0.10.3-amd64_linux/rcon /usr/local/bin/
 
-RUN         cat /etc/inetd.conf
-
 USER        container
 ENV         USER=container HOME=/home/container
 WORKDIR     /home/container
