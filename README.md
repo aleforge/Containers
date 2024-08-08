@@ -40,6 +40,21 @@ because these images are tuned to work with our platform and may not function ou
 
 ### [Java](/java)
 
+#### [Temurin](/java/Temurin)
+
+* [`java8`](/java/8)
+  * `ghcr.io/aleforge/containers:java-8`
+* [`java11`](/java/11)
+  * `ghcr.io/aleforge/containers:java-11`
+* [`java16`](/java/16)
+  * `ghcr.io/aleforge/containers:java-16`
+* [`java17`](/java/17)
+  * `ghcr.io/aleforge/containers:java-17`
+* [`java19`](/java/19)
+  * `ghcr.io/aleforge/containers:java-19`
+* [`java21`](/java/21)
+  * `ghcr.io/aleforge/containers:java-21`
+
 #### [GraalVM](/java/GraalVM)
 
 - [`java8`](/GraalVM/jdk8-ee)
@@ -54,6 +69,8 @@ because these images are tuned to work with our platform and may not function ou
   - `ghcr.io/aleforge/containers:graalvm-jdk20`
 - [`java21`](/GraalVM/jdk21)
   - `ghcr.io/aleforge/containers:graalvm-jdk21`
+- [`java22`](/GraalVM/jdk22)
+  - `ghcr.io/aleforge/containers:graalvm-jdk22`
 
 ### [MariaDB](/mariadb)
 
