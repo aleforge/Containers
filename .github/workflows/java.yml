@@ -1,11 +1,11 @@
-name: Java GraalVM
+name: Java
 
 on:
   push:
     branches: 
       - main
     paths:
-      - Java/GraalVM/**
+      - Java/temurin/**
   workflow_dispatch:
   schedule:
     - cron: "0 0 * * 1"
@@ -13,7 +13,7 @@ on:
 
 jobs:
   push:
-    name: "AleForge-GraalVM-${{ matrix.version }}"
+    name: "AleForge-Java-${{ matrix.version }}"
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -22,14 +22,15 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - jdk8-ee
-          - jdk11
-          - jdk11-ee
-          - jdk17
-          - jdk17-ee
-          - jdk20
-          - jdk21
-          - jdk22
+          - 8
+#          - 8j9
+          - 11
+#          - 11j9
+          - 16
+#          - 16j9
+          - 17
+          - 19
+          - 21
     steps:
       - uses: actions/checkout@v4
       - name: Set up QEMU
@@ -46,8 +47,8 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./Java
-          file: ./Java/GraalVM/${{ matrix.version }}/Dockerfile
+          file: ./Java/temurin/${{ matrix.version }}/Dockerfile
           platforms: linux/amd64
           push: true
           tags: |
-            ghcr.io/aleforge/containers:graalvm-${{ matrix.version }}
+            ghcr.io/aleforge/containers:java-${{ matrix.version }}
