@@ -1,7 +1,7 @@
 # ---------------------------------------
 # Generic Wine image based on Wine staging 
 # ---------------------------------------
-FROM            ghcr.io/aleforge/base:debian
+FROM            ghcr.io/aleforge/base:ubuntu
 
 LABEL       author="AleForge" maintainer="info@aleforge.net"
 
