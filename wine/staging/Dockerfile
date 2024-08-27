@@ -1,19 +1,17 @@
 # ---------------------------------------
 # Generic Wine image based on Wine staging 
 # ---------------------------------------
-FROM            ghcr.io/aleforge/base:debian
+FROM            ghcr.io/aleforge/base:ubuntu
 
 LABEL       author="AleForge" maintainer="info@aleforge.net"
 
 LABEL       org.opencontainers.image.source="https://github.com/aleforge/containers"
 LABEL       org.opencontainers.image.licenses=MIT
 
-ENV          DEBIAN_FRONTEND noninteractive
-
 ## install required packages
 RUN             dpkg --add-architecture i386 \
                 && apt update -y \
-                && apt install -y --no-install-recommends gnupg2 numactl tzdata software-properties-common libntlm0 winbind xvfb xauth python3 libncurses5:i386 libncurses6:i386 libsdl2-2.0-0 libsdl2-2.0-0:i386 libxi6
+                && apt install -y --no-install-recommends gnupg2 numactl tzdata software-properties-common libntlm0 winbind xvfb xauth python3 libncurses5:i386 libncurses6:i386 libsdl2-2.0-0 libsdl2-2.0-0:i386
 
 RUN             cd /tmp/ \
                 && curl -sSL https://github.com/gorcon/rcon-cli/releases/download/v0.10.3/rcon-0.10.3-amd64_linux.tar.gz > rcon.tar.gz \
