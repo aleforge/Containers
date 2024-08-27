@@ -24,7 +24,6 @@ jobs:
         version:
           - alpine
           - debian
-          - debian12
           - ubuntu
     steps:
       - uses: actions/checkout@v3
