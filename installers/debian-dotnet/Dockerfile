@@ -14,7 +14,7 @@ RUN      apt update && apt upgrade -y \
 RUN         if [ "$(uname -m)" = "x86_64" ]; then \
                 dpkg --add-architecture i386 && \
                 apt update && \
-                apt -y install lib32gcc-s1 libsdl2-2.0-0:i386 apt-transport-https wget curl iproute2 libgdiplus tini &&
+                apt -y install lib32gcc-s1 libsdl2-2.0-0:i386 apt-transport-https wget curl iproute2 libgdiplus tini \
                 && wget https://dot.net/v1/dotnet-install.sh \
                 && D_V="$(curl -sSL https://dotnet.microsoft.com/en-us/download/dotnet/6.0 | grep -i  '<h3 id="sdk-6.*">SDK 6.*.*</h3>'  | head -1 | awk -F\" '{print $3}' | awk '{print $2;}' | sed 's/<\/h3>//g')" \   
                 && chmod +x dotnet-install.sh \
