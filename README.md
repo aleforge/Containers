@@ -72,6 +72,21 @@ because these images are tuned to work with our platform and may not function ou
 - [`java22`](/GraalVM/jdk22)
   - `ghcr.io/aleforge/containers:graalvm-jdk22`
 
+#### [OpenJDK](/java/OpenJDK)
+
+* [`java8`](/java/OpenJDK/8j9)
+  * `ghcr.io/aleforge/containers:java-8j9`
+* [`java11`](/java/OpenJDK/11j9)
+  * `ghcr.io/aleforge/containers:java-11j9`
+* [`java16`](/java/OpenJDK/16j9)
+  * `ghcr.io/aleforge/containers:java-16j9`
+* [`java17`](/java/OpenJDK/17j9)
+  * `ghcr.io/aleforge/containers:java-17j9`
+* [`java19`](/java/OpenJDK/19j9)
+  * `ghcr.io/aleforge/containers:java-19j9`
+* [`java21`](/java/OpenJDK/21j9)
+  * `ghcr.io/aleforge/containers:java-21j9`
+
 ### [MariaDB](/mariadb)
 
 - [`MariaDB 10.3`](/mariadb/10.3)

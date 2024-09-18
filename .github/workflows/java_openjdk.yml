@@ -45,7 +45,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./Java
-          file: ./Java/temurin/${{ matrix.version }}/Dockerfile
+          file: ./Java/OpenJDK/${{ matrix.version }}/Dockerfile
           platforms: linux/amd64
           push: true
           tags: |
