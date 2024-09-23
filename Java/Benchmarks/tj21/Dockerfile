@@ -20,7 +20,7 @@ RUN         apt update -y \
                 tini \
 				zip \
 				unzip \
-                python3 \
+                python \
             && python --version
 
 ## Setup user and working directory
