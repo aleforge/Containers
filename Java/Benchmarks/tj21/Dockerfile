@@ -21,7 +21,9 @@ RUN         apt update -y \
 				zip \
 				unzip \
                 software-properties-common \
-            && python3 –version
+            && whereis python3 \
+            && whereis python2 \
+            && ls -ls /usr/bin/python*
 
 ## Setup user and working directory
 RUN         useradd -m -d /home/container -s /bin/bash container
