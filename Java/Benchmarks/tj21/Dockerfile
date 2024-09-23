@@ -21,10 +21,7 @@ RUN         apt update -y \
 				zip \
 				unzip \
                 software-properties-common \
-            && add-apt-repository ppa:deadsnakes/ppa -y \
-            && apt update \
-            && apt install python3.10 -y \
-            && python --version
+            && python3 –version
 
 ## Setup user and working directory
 RUN         useradd -m -d /home/container -s /bin/bash container
