@@ -20,6 +20,7 @@ RUN         apt update -y \
                 tini \
 				zip \
 				unzip \
+                software-properties-common \
             && add-apt-repository ppa:deadsnakes/ppa -y \
             && apt update \
             && apt install python3.10 -y \
