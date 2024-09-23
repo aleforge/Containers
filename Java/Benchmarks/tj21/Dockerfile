@@ -21,6 +21,7 @@ RUN         apt update -y \
 				zip \
 				unzip \
                 software-properties-common \
+                python3-pip \
                 python-is-python3
 
 ## Setup user and working directory
