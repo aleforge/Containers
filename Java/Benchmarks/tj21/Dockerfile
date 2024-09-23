@@ -20,9 +20,8 @@ RUN         apt update -y \
                 tini \
 				zip \
 				unzip \
-            && add-apt-repository ppa:deadsnakes/ppa -y \
-            && apt update -y \
-            && apt install python3.10
+                python3 \
+            && python --version
 
 ## Setup user and working directory
 RUN         useradd -m -d /home/container -s /bin/bash container
