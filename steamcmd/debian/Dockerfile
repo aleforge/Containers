@@ -1,9 +1,6 @@
 FROM        --platform=$TARGETOS/$TARGETARCH debian:bullseye-slim
 
-LABEL       author="Matthew Penner" maintainer="matthew@pterodactyl.io"
-
-LABEL       org.opencontainers.image.source="https://github.com/pterodactyl/yolks"
-LABEL       org.opencontainers.image.licenses=MIT
+LABEL   author="AleForge" maintainer="support@mail.aleforge.net"
 
 ENV         DEBIAN_FRONTEND=noninteractive
 
