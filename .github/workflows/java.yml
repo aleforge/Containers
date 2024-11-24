@@ -23,14 +23,12 @@ jobs:
       matrix:
         version:
           - 8
-#          - 8j9
           - 11
-#          - 11j9
           - 16
-#          - 16j9
           - 17
           - 19
           - 21
+          - 22
     steps:
       - uses: actions/checkout@v4
       - name: Set up QEMU
