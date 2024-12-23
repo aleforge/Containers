@@ -293,6 +293,50 @@ if [ -n "${BAN_LIST_URL}" ]; then
     echo "BAN_LIST_URL=$BAN_LIST_URL"
     sed -E -i "s~BanListURL=\"[^\"]*\"~BanListURL=\"$BAN_LIST_URL\"~" Pal/Saved/Config/LinuxServer/PalWorldSettings.ini
 fi
+if [ -n "${PREDATOR_BOSS}" ]; then
+    echo "EnablePredatorBossPal=$PREDATOR_BOSS"
+    sed -E -i "s~EnablePredatorBossPal=\"[^\"]*\"~EnablePredatorBossPal=\"$PREDATOR_BOSS\"~" Pal/Saved/Config/LinuxServer/PalWorldSettings.ini
+fi
+if [ -n "${HARDCORE}" ]; then
+    echo "bHardcore=$HARDCORE"
+    sed -E -i "s~bHardcore=\"[^\"]*\"~bHardcore=\"$HARDCORE\"~" Pal/Saved/Config/LinuxServer/PalWorldSettings.ini
+fi
+if [ -n "${LOST_PAL}" ]; then
+    echo "bPalLost=$LOST_PAL"
+    sed -E -i "s~bPalLost=\"[^\"]*\"~bPalLost=\"$LOST_PAL\"~" Pal/Saved/Config/LinuxServer/PalWorldSettings.ini
+fi
+if [ -n "${BUILD_LIMIT}" ]; then
+    echo "bBuildAreaLimit=$BUILD_LIMIT"
+    sed -E -i "s~bBuildAreaLimit=\"[^\"]*\"~bBuildAreaLimit=\"$BUILD_LIMIT\"~" Pal/Saved/Config/LinuxServer/PalWorldSettings.ini
+fi
+if [ -n "${ITEM_WEIGHT}" ]; then
+    echo "ItemWeightRate=$ITEM_WEIGHT"
+    sed -E -i "s~ItemWeightRate=\"[^\"]*\"~ItemWeightRate=\"$ITEM_WEIGHT\"~" Pal/Saved/Config/LinuxServer/PalWorldSettings.ini
+fi
+if [ -n "${BUILDING_LIMIT}" ]; then
+    echo "MaxBuildingLimitNum=$BUILDING_LIMIT"
+    sed -E -i "s~MaxBuildingLimitNum=\"[^\"]*\"~MaxBuildingLimitNum=\"$BUILDING_LIMIT\"~" Pal/Saved/Config/LinuxServer/PalWorldSettings.ini
+fi
+if [ -n "${RANDOMIZER_TYPE}" ]; then
+    echo "RandomizerType=$RANDOMIZER_TYPE"
+    sed -E -i "s~RandomizerType=\"[^\"]*\"~RandomizerType=\"$RANDOMIZER_TYPE\"~" Pal/Saved/Config/LinuxServer/PalWorldSettings.ini
+fi
+if [ -n "${SEED}" ]; then
+    echo "RandomizerSeed=$SEED"
+    sed -E -i "s~RandomizerSeed=\"[^\"]*\"~RandomizerSeed=\"$SEED\"~" Pal/Saved/Config/LinuxServer/PalWorldSettings.ini
+fi
+if [ -n "${BUILD_HEALTH_OBJECT}" ]; then
+    echo "BuildObjectHpRate=$BUILD_HEALTH_OBJECT"
+    sed -E -i "s~BuildObjectHpRate=\"[^\"]*\"~BuildObjectHpRate=\"$BUILD_HEALTH_OBJECT\"~" Pal/Saved/Config/LinuxServer/PalWorldSettings.ini
+fi
+if [ -n "${CULL_DISTANCE}" ]; then
+    echo "ServerReplicatePawnCullDistance=$CULL_DISTANCE"
+    sed -E -i "s~ServerReplicatePawnCullDistance=\"[^\"]*\"~ServerReplicatePawnCullDistance=\"$CULL_DISTANCE\"~" Pal/Saved/Config/LinuxServer/PalWorldSettings.ini
+fi
+if [ -n "${CHAT_LIMIT}" ]; then
+    echo "ChatPostLimitPerMinute=$CHAT_LIMIT"
+    sed -E -i "s~ChatPostLimitPerMinute=\"[^\"]*\"~ChatPostLimitPerMinute=\"$CHAT_LIMIT\"~" Pal/Saved/Config/LinuxServer/PalWorldSettings.ini
+fi
 
 # Replace Startup Variables
 MODIFIED_STARTUP=$(echo ${STARTUP} | sed -e 's/{{/${/g' -e 's/}}/}/g')
