@@ -222,7 +222,7 @@ if [ -n "${DROP_ITEM_MAX_NUM_UNKO}" ]; then
     sed -E -i "s/DropItemMaxNum_UNKO=[0-9]*/DropItemMaxNum_UNKO=$DROP_ITEM_MAX_NUM_UNKO/" Pal/Saved/Config/LinuxServer/PalWorldSettings.ini
 fi
 if [ -n "${BASE_CAMP_MAX_NUM}" ]; then
-    echo "BASE_CAMP_MAX_NUM=$BASE_CAMP_MAX_NUM"
+    echo "BaseCampMaxNum=$BASE_CAMP_MAX_NUM"
     sed -E -i "s/BaseCampMaxNum=[0-9]*/BaseCampMaxNum=$BASE_CAMP_MAX_NUM/" Pal/Saved/Config/LinuxServer/PalWorldSettings.ini
 fi
 if [ -n "${BASE_CAMP_WORKER_MAXNUM}" ]; then
@@ -336,6 +336,10 @@ fi
 if [ -n "${CHAT_LIMIT}" ]; then
     echo "ChatPostLimitPerMinute=$CHAT_LIMIT"
     sed -E -i "s~ChatPostLimitPerMinute=\"[^\"]*\"~ChatPostLimitPerMinute=\"$CHAT_LIMIT\"~" Pal/Saved/Config/LinuxServer/PalWorldSettings.ini
+fi
+if [ -n "${CAMP_MAX}" ]; then
+    echo "BaseCampMaxNumInGuild=$CAMP_MAX"
+    sed -E -i "s~BaseCampMaxNumInGuild=\"[^\"]*\"~BaseCampMaxNumInGuild=\"$CAMP_MAX\"~" Pal/Saved/Config/LinuxServer/PalWorldSettings.ini
 fi
 
 # Replace Startup Variables
