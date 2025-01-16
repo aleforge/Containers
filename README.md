@@ -39,6 +39,8 @@ because these images are tuned to work with our platform and may not function ou
   - `ghcr.io/aleforge/games:rust`
 - [`Source`](/games/source)
   - `ghcr.io/aleforge/games:source`
+- [`Aloft`](/games/aloft)
+  - `ghcr.io/aleforge/games:aloft`
 
 ### [Java](/java)
 
