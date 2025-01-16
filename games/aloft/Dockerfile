@@ -82,7 +82,8 @@
                     gstreamer1.0-x \
                     gstreamer1.0-alsa \
                     gstreamer1.0-gl \
-                    gstreamer1.0-pulseaudio
+                    gstreamer1.0-pulseaudio \
+                    dxvk
     
     # Download Proton GE
     RUN         curl -sLOJ $(curl -s https://api.github.com/repos/GloriousEggroll/proton-ge-custom/releases/latest | grep browser_download_url | cut -d\" -f4 | egrep .tar.gz)
