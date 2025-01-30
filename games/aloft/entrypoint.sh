@@ -17,7 +17,7 @@ export TZ
 
 # Information output
 echo -e "${BLUE}---------------------------------------------------------------------${NC}"
-echo -e "${YELLOW}Wine Image from AleForge{NC}"
+echo -e "${YELLOW}Wine Image from AleForge${NC}"
 echo -e "${RED}THIS IMAGE IS LICENSED UNDER AGPLv3${NC}"
 echo -e "${BLUE}---------------------------------------------------------------------${NC}"
 echo -e "${YELLOW}echo -e "${YELLOW}Linux Distribution: ${RED} $(. /etc/os-release ; echo $PRETTY_NAME)${NC}" $(cat /etc/debian_version)${NC}"
@@ -120,4 +120,7 @@ MODIFIED_STARTUP=$(echo ${STARTUP} | sed -e 's/{{/${/g' -e 's/}}/}/g')
 echo ":/home/container$ ${MODIFIED_STARTUP}"
 
 # Run the Server
+echo -e "${BLUE}---------------------------------------------------------------------${NC}"
+echo -e "${YELLOW}On First Boot Stop and Start Server after Console Output Stops${NC}"
+echo -e "${BLUE}---------------------------------------------------------------------${NC}"
 eval ${MODIFIED_STARTUP}

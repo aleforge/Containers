@@ -1,91 +1,66 @@
 #!/bin/bash
-cd /home/container
+# Wait for the container to fully initialize
 sleep 1
-# Make internal Docker IP address available to processes.
-export INTERNAL_IP=`ip route get 1 | awk '{print $NF;exit}'`
 
-# Update Source Server
-if [ ! -z ${SRCDS_APPID} ]; then
-    if [ ${SRCDS_STOP_UPDATE} -eq 0 ]; then
-        STEAMCMD=""
-        if [ ! -z ${SRCDS_BETAID} ]; then
-            if [ ! -z ${SRCDS_BETAPASS} ]; then
-                if [ ${SRCDS_VALIDATE} -eq 1 ]; then
-                    if [ ! -z ${SRCDS_LOGIN} ]; then
-                        STEAMCMD="./steamcmd/steamcmd.sh +login ${SRCDS_LOGIN} ${SRCDS_LOGIN_PASS} +force_install_dir /home/container +app_update ${SRCDS_APPID} -beta ${SRCDS_BETAID} -betapassword ${SRCDS_BETAPASS} validate +quit"
-                    else
-                        STEAMCMD="./steamcmd/steamcmd.sh +login anonymous +force_install_dir /home/container +app_update ${SRCDS_APPID} -beta ${SRCDS_BETAID} -betapassword ${SRCDS_BETAPASS} validate +quit"
-                    fi
-                else
-                    if [ ! -z ${SRCDS_LOGIN} ]; then
-                        STEAMCMD="./steamcmd/steamcmd.sh +login ${SRCDS_LOGIN} ${SRCDS_LOGIN_PASS} +force_install_dir /home/container +app_update ${SRCDS_APPID} -beta ${SRCDS_BETAID} -betapassword ${SRCDS_BETAPASS} +quit"
-                    else
-                        STEAMCMD="./steamcmd/steamcmd.sh +login anonymous +force_install_dir /home/container +app_update ${SRCDS_APPID} -beta ${SRCDS_BETAID} -betapassword ${SRCDS_BETAPASS} +quit"
-                    fi
-                fi
-            else
-                if [ ${SRCDS_VALIDATE} -eq 1 ]; then
-                    if [ ! -z ${SRCDS_LOGIN} ]; then
-                        STEAMCMD="./steamcmd/steamcmd.sh +login ${SRCDS_LOGIN} ${SRCDS_LOGIN_PASS} +force_install_dir /home/container +app_update ${SRCDS_APPID} -beta ${SRCDS_BETAID} validate +quit"
-                    else             
-                        STEAMCMD="./steamcmd/steamcmd.sh +login anonymous +force_install_dir /home/container +app_update ${SRCDS_APPID} -beta ${SRCDS_BETAID} validate +quit"
-                    fi
-                else
-                    if [ ! -z ${SRCDS_LOGIN} ]; then
-                        STEAMCMD="./steamcmd/steamcmd.sh +login ${SRCDS_LOGIN} ${SRCDS_LOGIN_PASS} +force_install_dir /home/container +app_update ${SRCDS_APPID} -beta ${SRCDS_BETAID} +quit"
-                    else 
-                        STEAMCMD="./steamcmd/steamcmd.sh +login anonymous +force_install_dir /home/container +app_update ${SRCDS_APPID} -beta ${SRCDS_BETAID} +quit"
-                    fi
-                fi
-            fi
-        else
-            if [ ${SRCDS_VALIDATE} -eq 1 ]; then
-                if [ ! -z ${SRCDS_LOGIN} ]; then
-                    STEAMCMD="./steamcmd/steamcmd.sh +login ${SRCDS_LOGIN} ${SRCDS_LOGIN_PASS} +force_install_dir /home/container +app_update ${SRCDS_APPID} validate +quit"
-                else
-                    STEAMCMD="./steamcmd/steamcmd.sh +login anonymous +force_install_dir /home/container +app_update ${SRCDS_APPID} validate +quit"
-                fi
-            else
-                if [ ! -z ${SRCDS_LOGIN} ]; then
-                    STEAMCMD="./steamcmd/steamcmd.sh +login ${SRCDS_LOGIN} ${SRCDS_LOGIN_PASS} +force_install_dir /home/container +app_update ${SRCDS_APPID} +quit"
-                else
-                    STEAMCMD="./steamcmd/steamcmd.sh +login anonymous +force_install_dir /home/container +app_update ${SRCDS_APPID} +quit"
-                fi
-            fi
+# Default the TZ environment variable to UTC.
+TZ=${TZ:-UTC}
+export TZ
+
+# Set environment variable that holds the Internal Docker IP
+INTERNAL_IP=$(ip route get 1 | awk '{print $(NF-2);exit}')
+export INTERNAL_IP
+
+# Set environment for Steam Proton
+if [ -f "/usr/local/bin/proton" ]; then
+    if [ ! -z ${SRCDS_APPID} ]; then
+	    mkdir -p /home/container/.steam/steam/steamapps/compatdata/${SRCDS_APPID}
+        export STEAM_COMPAT_CLIENT_INSTALL_PATH="/home/container/.steam/steam"
+        export STEAM_COMPAT_DATA_PATH="/home/container/.steam/steam/steamapps/compatdata/${SRCDS_APPID}"
+        # Fix for pipx with protontricks
+        export PATH=$PATH:/root/.local/bin
+    else
+        echo -e "----------------------------------------------------------------------------------"
+        echo -e "WARNING!!! Proton needs variable SRCDS_APPID, else it will not work. Please add it"
+        echo -e "Server stops now"
+        echo -e "----------------------------------------------------------------------------------"
+        exit 0
         fi
-
-        # echo "SteamCMD Launch: ${STEAMCMD}"
-        eval ${STEAMCMD}
-    fi
 fi
 
-# Edit /home/container/game/csgo/gameinfo.gi to add MetaMod path
-# Credit: https://github.com/ghostcap-gaming/ACMRS-cs2-metamod-update-fix/blob/main/acmrs.sh
-GAMEINFO_FILE="/home/container/game/csgo/gameinfo.gi"
-GAMEINFO_ENTRY="			Game	csgo/addons/metamod" 
-if [ -f "${GAMEINFO_FILE}" ]; then
-    if grep -q "Game[[:blank:]]*csgo\/addons\/metamod" "$GAMEINFO_FILE"; then # match any whitespace
-        echo "File gameinfo.gi already configured. No changes were made."
-    else
-        awk -v new_entry="$GAMEINFO_ENTRY" '
-            BEGIN { found=0; }
-            // {
-                if (found) {
-                    print new_entry;
-                    found=0;
-                }
-                print;
-            }
-            /Game_LowViolence/ { found=1; }
-        ' "$GAMEINFO_FILE" > "$GAMEINFO_FILE.tmp" && mv "$GAMEINFO_FILE.tmp" "$GAMEINFO_FILE"
+# Switch to the container's working directory
+cd /home/container || exit 1
 
-        echo "The file ${GAMEINFO_FILE} has been configured for MetaMod successfully."
+## just in case someone removed the defaults.
+if [ "${STEAM_USER}" == "" ]; then
+    echo -e "steam user is not set.\n"
+    echo -e "Using anonymous user.\n"
+    STEAM_USER=anonymous
+    STEAM_PASS=""
+    STEAM_AUTH=""
+else
+    echo -e "user set to ${STEAM_USER}"
+fi
+
+## if auto_update is not set or to 1 update
+if [ -z ${AUTO_UPDATE} ] || [ "${AUTO_UPDATE}" == "1" ]; then 
+    # Update Source Server
+    if [ ! -z ${SRCDS_APPID} ]; then
+	    if [ "${STEAM_USER}" == "anonymous" ]; then
+            ./steamcmd/steamcmd.sh +force_install_dir /home/container +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ "${WINDOWS_INSTALL}" == "1" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update 1007 +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s "-beta ${SRCDS_BETAID}" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s "-betapassword ${SRCDS_BETAPASS}" ) $( [[ -z ${HLDS_GAME} ]] || printf %s "+app_set_config 90 mod ${HLDS_GAME}" )  ${INSTALL_FLAGS} $( [[ "${VALIDATE}" == "1" ]] && printf %s 'validate' ) +quit
+	    else
+            ./steamcmd/steamcmd.sh +force_install_dir /home/container +login ${STEAM_USER} ${STEAM_PASS} ${STEAM_AUTH} $( [[ "${WINDOWS_INSTALL}" == "1" ]] && printf %s '+@sSteamCmdForcePlatformType windows' ) +app_update 1007 +app_update ${SRCDS_APPID} $( [[ -z ${SRCDS_BETAID} ]] || printf %s "-beta ${SRCDS_BETAID}" ) $( [[ -z ${SRCDS_BETAPASS} ]] || printf %s "-betapassword ${SRCDS_BETAPASS}" ) $( [[ -z ${HLDS_GAME} ]] || printf %s "+app_set_config 90 mod ${HLDS_GAME}" ) ${INSTALL_FLAGS} $( [[ "${VALIDATE}" == "1" ]] && printf %s 'validate' ) +quit
+	    fi
+    else
+        echo -e "No appid set. Starting Server"
     fi
+
+else
+    echo -e "Not updating game server as auto update was set to 0. Starting Server"
 fi
 
 # Replace Startup Variables
-MODIFIED_STARTUP=`eval echo $(echo ${STARTUP} | sed -e 's/{{/${/g' -e 's/}}/}/g')`
-echo ":/home/container$ ${MODIFIED_STARTUP}"
+MODIFIED_STARTUP=$(echo ${STARTUP} | sed -e 's/{{/${/g' -e 's/}}/}/g')
+echo -e ":/home/container$ ${MODIFIED_STARTUP}"
 
 # Run the Server
 eval ${MODIFIED_STARTUP}

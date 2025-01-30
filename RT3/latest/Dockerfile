@@ -6,34 +6,26 @@ LABEL       author="AleForge" maintainer="support@mail.aleforge.net"
 LABEL       org.opencontainers.image.source="https://github.com/aleforge/containers"
 LABEL       org.opencontainers.image.licenses=MIT
 
-## add container user
-RUN   useradd -m -d /home/container -s /bin/bash container
+## install required packages
+RUN         dpkg --add-architecture i386 \
+            && apt-get update \
+            && apt-get upgrade -y \
+            && apt-get install -y tar curl gcc g++ lib32gcc-s1 libgcc1 libcurl4-gnutls-dev:i386 libssl1.1:i386 libcurl4:i386 lib32tinfo6 libtinfo6:i386 lib32z1 lib32stdc++6 libncurses5:i386 libcurl3-gnutls:i386 libsdl2-2.0-0:i386 libsdl2-2.0-0 iproute2 gdb libsdl1.2debian libfontconfig1 telnet net-tools netcat tzdata numactl xvfb tini libc6 \
+            && useradd -m -d /home/container container
 
-## update base packages
-RUN   apt update \
-        &&   apt upgrade -y
-
-## install dependencies
-RUN   apt install -y iproute2 && apt-get clean
-
-# Prep OS
-RUN         mkdir -p /etc/sudoers.d && echo "%sudo ALL=(ALL:ALL) NOPASSWD: ALL" > /etc/sudoers.d/flatdeb && chmod 0440 /etc/sudoers.d/flatdeb
-ENV         DEBIAN_FRONTEND=noninteractive
-
-
-## configure locale
-RUN   update-locale lang=en_US.UTF-8 \
-        &&   dpkg-reconfigure --frontend noninteractive locales
-
-# To-Do: If CS2 requires Wine, the following lines will need to be uncommented
-# RUN         apt update
-# RUN         apt install -y wine wine64 libwine && apt clean
-
-WORKDIR /home/container
+## install rcon
+RUN         cd /tmp/ \
+            && curl -sSL https://github.com/gorcon/rcon-cli/releases/download/v0.10.3/rcon-0.10.3-amd64_linux.tar.gz > rcon.tar.gz \
+            && tar xvf rcon.tar.gz \
+            && mv rcon-0.10.3-amd64_linux/rcon /usr/local/bin/
+            
+USER        container
+ENV         USER=container HOME=/home/container
+WORKDIR     /home/container
 
 STOPSIGNAL SIGINT
 
-COPY        --chown=container:container ./entrypoint.sh /entrypoint.sh
+COPY        --chown=container:container ./../entrypoint.sh /entrypoint.sh
 RUN         chmod +x /entrypoint.sh
-ENTRYPOINT    ["/usr/bin/tini", "-g", "--"]
+ENTRYPOINT  ["/usr/bin/tini", "-g", "--"]
 CMD         ["/entrypoint.sh"]
