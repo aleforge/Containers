@@ -23,7 +23,7 @@ RUN             mkdir -pm755 /etc/apt/keyrings
 RUN             wget -O /etc/apt/keyrings/winehq-archive.key https://dl.winehq.org/wine-builds/winehq.key
 RUN             wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/debian/dists/bookworm/winehq-bookworm.sources
 RUN             apt update
-RUN             apt install --install-recommends winehq-stable=9.0.0.0~bookworm-1 cabextract wine-binfmt=9.0.0.0~bookworm-1 -y
+RUN             apt install --install-recommends winehq-stable=9.0.0.0~bookworm-1 cabextract wine-binfmt -y
 
 # Set up Winetricks
 RUN	            wget -q -O /usr/sbin/winetricks https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks \
