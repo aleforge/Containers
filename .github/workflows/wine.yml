@@ -23,6 +23,7 @@ jobs:
           - devel
           - staging
           - 8
+          - 9
     steps:
         - uses: actions/checkout@v4
         - name: Set up QEMU

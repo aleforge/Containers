@@ -141,6 +141,7 @@ because these images are tuned to work with our platform and may not function ou
   - `ghcr.io/aleforge/wine:devel`
   - `ghcr.io/aleforge/wine:staging`
   - `ghcr.io/aleforge/wine:8`
+  - - `ghcr.io/aleforge/wine:9`
 
 ## Sponsor :
 
