@@ -26,7 +26,7 @@ RUN         rm /var/lib/dbus/machine-id
 RUN         dbus-uuidgen --ensure
 
 #Setup Protontricks
-RUN         python3 -m pip install protontricks
+RUN        pipx install protontricks
 
 # Set up Winetricks
 RUN	        wget -q -O /usr/sbin/winetricks https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks \
