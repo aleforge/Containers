@@ -27,6 +27,7 @@ jobs:
           - palworld
           - source
           - aloft
+          - valheim
     steps:
       - uses: actions/checkout@v3
       - name: Set up QEMU
