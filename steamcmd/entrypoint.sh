@@ -44,7 +44,7 @@ export INTERNAL_IP
 echo -e "${BLUE}---------------------------------------------------------------------${NC}"
 echo -e "${RED}SteamCMD Proton Image${NC}"
 echo -e "${BLUE}---------------------------------------------------------------------${NC}"
-echo -e "${YELLOW}$(lsb_release -a)${NC}"
+echo -e "${YELLOW}echo -e "${YELLOW}Linux Distribution: ${RED} $(. /etc/os-release ; echo $PRETTY_NAME)${NC}" $(cat /etc/debian_version)${NC}"
 echo -e "${YELLOW}Current timezone: ${RED} $(cat /etc/timezone)${NC}"
 echo -e "${GREEN}Maintained by AleForge.net${NC}"
 echo -e "${BLUE}---------------------------------------------------------------------${NC}"
