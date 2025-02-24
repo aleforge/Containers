@@ -1,4 +1,4 @@
-FROM        --platform=$TARGETOS/$TARGETARCH eclipse-temurin:16-jdk-focal
+FROM        --platform=$TARGETOS/$TARGETARCH eclipse-temurin:16-jdk-noble
 
 LABEL author="AleForge Support" maintainer="support@mail.aleforge.net"
 LABEL org.opencontainers.image.source="https://github.com/aleforge/containers/"
