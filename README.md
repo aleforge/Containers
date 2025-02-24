@@ -43,6 +43,8 @@ because these images are tuned to work with our platform and may not function ou
   - `ghcr.io/aleforge/games:aloft`
 - [`Valheim`](/games/valheim)
   - `ghcr.io/aleforge/games:valheim`
+- [`corekeeper`](/games/corekeeper)
+  - `ghcr.io/aleforge/games:corekeeper`
 
 ### [Java](/java)
 

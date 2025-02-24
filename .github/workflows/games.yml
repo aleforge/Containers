@@ -28,6 +28,7 @@ jobs:
           - source
           - aloft
           - valheim
+          - corekeeper
     steps:
       - uses: actions/checkout@v3
       - name: Set up QEMU
