@@ -1,6 +1,16 @@
 #!/bin/bash
 cd /home/container
 
+clear
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+# Wait for the container to fully initialize
+sleep 1
+
 # Information output
 echo "Running on Debian $(cat /etc/debian_version)"
 echo "Current timezone: $(cat /etc/timezone)"
@@ -9,6 +19,15 @@ wine --version
 # Make internal Docker IP address available to processes.
 INTERNAL_IP=$(ip route get 1 | awk '{print $(NF-2);exit}')
 export INTERNAL_IP
+
+echo -e "${BLUE}----------------------------------------------------------------------------------${NC}"
+    echo -e "${RED}SteamCMD Proton-GE Image by AleForge${NC}"
+    echo -e "${BLUE}----------------------------------------------------------------------------------${NC}"
+    echo -e "${YELLOW}Running on Debian: ${RED} $(cat /etc/debian_version)${NC}"
+    echo -e "${YELLOW}Kernel: ${RED} $(uname -r)${NC}"
+    echo -e "${YELLOW}Current timezone: ${RED} $(cat /etc/timezone)${NC}"
+    echo -e "${YELLOW}Proton Version: ${RED} $(cat /usr/local/bin/version)${NC}"
+    echo -e "${BLUE}----------------------------------------------------------------------------------${NC}"
 
 ## just in case someone removed the defaults.
 if [ "${STEAM_USER}" == "" ]; then

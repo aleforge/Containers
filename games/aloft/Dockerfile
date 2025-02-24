@@ -1,12 +1,9 @@
 FROM        	ubuntu:24.04
 
-LABEL           author="Torsten Widmann - gOOvER - info@goover.de" maintainer="AleForge"
-LABEL           forkedsource="https://github.com/gOOvER/own-pterodactyl-images"
-LABEL           org.opencontainers.image.source="https://github.com/aleforge/containers"
-LABEL       	org.opencontainers.image.description="A Docker image to run wine and Aloft on AleForge Panel (https://panel.aleforge.net)"
-LABEL       	org.opencontainers.image.licenses=AGPL-3.0-or-later
+LABEL       author="AleForge" maintainer="info@aleforge.net"
 
-
+LABEL       org.opencontainers.image.source="https://github.com/aleforge/containers"
+LABEL       org.opencontainers.image.licenses=MIT
 
 LABEL       org.opencontainers.image.source="https://github.com/aleforge/containers"
 LABEL       org.opencontainers.image.licenses=MIT
