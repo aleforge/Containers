@@ -26,7 +26,7 @@ jobs:
           - debian
           - ubuntu
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
@@ -42,7 +42,7 @@ jobs:
           ls -ltr .
         shell: bash
       - name: Build and push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: ./oses/${{ matrix.version }}
           file: ./oses/${{ matrix.version }}/Dockerfile
