@@ -30,6 +30,8 @@ jobs:
           - jdk20
           - jdk21
           - jdk22
+          - jdk23
+          - jdk24
     steps:
       - uses: actions/checkout@v4
       - name: Set up QEMU

@@ -29,6 +29,8 @@ jobs:
           - 18j9
           - 19j9
           - 21j9
+          - 22j9
+          - 23j9
     steps:
       - uses: actions/checkout@v4
       - name: Set up QEMU
