@@ -83,6 +83,10 @@ because these images are tuned to work with our platform and may not function ou
   - `ghcr.io/aleforge/containers:graalvm-jdk21`
 - [`java22`](/GraalVM/jdk22)
   - `ghcr.io/aleforge/containers:graalvm-jdk22`
+- [`java23`](/GraalVM/jdk23)
+  - `ghcr.io/aleforge/containers:graalvm-jdk23`
+- [`java24`](/GraalVM/jdk24)
+  - `ghcr.io/aleforge/containers:graalvm-jdk24`
 
 #### [OpenJDK](/java/OpenJDK)
 
@@ -98,6 +102,10 @@ because these images are tuned to work with our platform and may not function ou
   * `ghcr.io/aleforge/containers:java-19j9`
 * [`java21`](/java/OpenJDK/21j9)
   * `ghcr.io/aleforge/containers:java-21j9`
+* [`java22`](/java/OpenJDK/22j9)
+  * `ghcr.io/aleforge/containers:java-22j9`
+* [`java23`](/java/OpenJDK/23j9)
+  * `ghcr.io/aleforge/containers:java-23j9`
 
 ### [MariaDB](/mariadb)
 
