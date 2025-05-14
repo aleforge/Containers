@@ -23,7 +23,7 @@ jobs:
       matrix:
         version:
           #- alpine
-          #- debian
+          - debian
           - debian-dotnet
           #- ubuntu
     steps:
