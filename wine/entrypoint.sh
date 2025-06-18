@@ -21,7 +21,7 @@ INTERNAL_IP=$(ip route get 1 | awk '{print $(NF-2);exit}')
 export INTERNAL_IP
 
 echo -e "${BLUE}----------------------------------------------------------------------------------${NC}"
-    echo -e "${RED}SteamCMD Proton-GE Image by AleForge${NC}"
+    echo -e "${RED}SteamCMD Wine Image by AleForge${NC}"
     echo -e "${BLUE}----------------------------------------------------------------------------------${NC}"
     echo -e "${YELLOW}Running on Debian: ${RED} $(cat /etc/debian_version)${NC}"
     echo -e "${YELLOW}Kernel: ${RED} $(uname -r)${NC}"

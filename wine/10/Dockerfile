@@ -10,28 +10,70 @@ LABEL       org.opencontainers.image.licenses=MIT
 
 ## install required packages
 RUN             dpkg --add-architecture i386 \
-                && apt update -y \
-                 && apt install -y --no-install-recommends \
+RUN             apt update
+RUN             apt -y upgrade
+RUN             apt install -y --no-install-recommends \
+                    apt-transport-https \
+                    binutils \
+                    ca-certificates \
+                    cabextract \
+                    curl \
+                    ffmpeg \
+                    g++ \
+                    gcc \
+                    gdb \
+                    git \
                     gnupg2 \
-                    tzdata \
-                    software-properties-common \
-                    libntlm0 \
-                    winbind \
-                    xvfb \
-                    xauth \
+					gnutls-bin \
+                    icu-devtools \
+                    iproute2 \
+                    locales \
+                    net-tools \
+                    netcat-openbsd \
+                    procps \
                     python3 \
-                    libncurses5:i386 \
+                    rapidjson-dev \
+                    software-properties-common \
+                    sqlite3 \
+                    tar \
+                    telnet \
+                    tini \
+                    tzdata \
+                    unzip \
+                    wget \
+                    winbind \
+                    xauth \
+                    xvfb \
+                    xz-utils \
+                    zip \
+                    libatomic1 \
+                    libc++-dev \
+                    libc6 \
+                    libduktape207 \
+                    libevent-dev \
+                    libfluidsynth3 \
+                    libfontconfig \
+                    libgcc1 \
+                    libicu74 \
+                    liblua5.4-0 \
+                    liblzo2-2 \
+                    libmariadbclient-dev-compat \
                     libncurses6:i386 \
+                    libntlm0 \
+                    libprotobuf32 \
+                    libsdl1.2debian \
                     libsdl2-2.0-0 \
                     libsdl2-2.0-0:i386 \
-                    alsa-tools \
-                    alsa-utils \
-                    alsa-oss \
-                    libpulse0 \
-                    pulseaudio \
-                    libpulse-dev \
-                    libasound2
+                    libsqlite3-dev \
+                    libstdc++6 \
+                    libunwind8 \
+                    libz-dev \
+                    libzip4
 
+RUN 			apt-get clean \
+				&& rm -rf /var/lib/apt/lists/*
+
+## install rcon
 RUN             cd /tmp/ \
                 && curl -sSL https://github.com/gorcon/rcon-cli/releases/download/v0.10.3/rcon-0.10.3-amd64_linux.tar.gz > rcon.tar.gz \
                 && tar xvf rcon.tar.gz \
@@ -52,16 +94,34 @@ RUN             apt install --install-recommends wine-stable-i386=10.0.0.0~bookw
 RUN	            wget -q -O /usr/sbin/winetricks https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks \
                 && chmod +x /usr/sbin/winetricks
 
+# Setup ENVs
 ENV             HOME=/home/container
 ENV             WINEPREFIX=/home/container/.wine
-ENV             WINEDEBUG=-all
 ENV             WINEDLLOVERRIDES="mscoree,mshtml="
 ENV             DISPLAY=:0
 ENV             DISPLAY_WIDTH=1024
 ENV             DISPLAY_HEIGHT=768
 ENV             DISPLAY_DEPTH=16
-ENV             AUTO_UPDATE=1
-ENV             XVFB=1
 
-COPY            ./../entrypoint.sh /entrypoint.sh
-CMD             [ "/bin/bash", "/entrypoint.sh" ]
+# Set the locale
+RUN         	sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
+            	locale-gen
+ENV        		LANG=en_US.UTF-8
+ENV         	LANGUAGE=en_US:en
+ENV         	LC_ALL=en_US.UTF-8
+
+RUN             bash -c 'echo "vm.max_map_count = 16777216" > /etc/sysctl.d/20-max_map_count.conf'
+
+## Setup user and working directory
+RUN             useradd -m -d /home/container -s /bin/bash container
+USER            container
+ENV             USER=container HOME=/home/container
+WORKDIR         /home/container
+
+# Sets the default stop signal as wings can (currently) only send a kill or generic stop
+STOPSIGNAL SIGINT
+
+COPY            --chown=container:container ../entrypoint.sh /entrypoint.sh
+RUN             chmod +x /entrypoint.sh
+ENTRYPOINT      ["/usr/bin/tini", "-g", "--"]
+CMD             ["/entrypoint.sh"]
