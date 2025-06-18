@@ -25,6 +25,10 @@ RUN             dpkg --add-architecture i386 \
                     libsdl2-2.0-0 \
                     libsdl2-2.0-0:i386 \
                     alsa-tools \
+                    alsa-utils \
+                    alsa-firmware \
+                    alsa-lib \
+                    alsa-oss \
                     libpulse0 \
                     pulseaudio \
                     libpulse-dev \
