@@ -9,7 +9,7 @@ LABEL       org.opencontainers.image.source="https://github.com/aleforge/contain
 LABEL       org.opencontainers.image.licenses=MIT
 
 ## install required packages
-RUN             dpkg --add-architecture i386 \
+RUN             dpkg --add-architecture i386
 RUN             apt update
 RUN             apt -y upgrade
 RUN             apt install -y --no-install-recommends \
