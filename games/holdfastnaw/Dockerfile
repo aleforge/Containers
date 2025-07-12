@@ -1,4 +1,4 @@
-FROM  ubuntu:18.04
+FROM  ubuntu:24.04
 
 LABEL author="AleForge Support" maintainer="support@mail.aleforge.net"
 LABEL org.opencontainers.image.source="https://github.com/aleforge/containers/"
