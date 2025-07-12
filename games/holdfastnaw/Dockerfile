@@ -29,5 +29,12 @@ ENV  USER=container HOME=/home/container
 
 WORKDIR /home/container
 
-COPY  ./entrypoint.sh /entrypoint.sh
-CMD   ["/bin/bash", "/entrypoint.sh"]
+# Add Tini
+ENV TINI_VERSION=v0.19.0
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
+RUN chmod +x /tini
+ENTRYPOINT ["/tini", "-g", "--"]
+
+COPY        --chown=container:container ../entrypoint.sh /entrypoint.sh
+RUN         chmod +x /entrypoint.sh
+CMD         ["/entrypoint.sh"]
