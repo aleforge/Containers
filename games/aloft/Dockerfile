@@ -5,9 +5,6 @@ LABEL       author="AleForge" maintainer="info@aleforge.net"
 LABEL       org.opencontainers.image.source="https://github.com/aleforge/containers"
 LABEL       org.opencontainers.image.licenses=MIT
 
-LABEL       org.opencontainers.image.source="https://github.com/aleforge/containers"
-LABEL       org.opencontainers.image.licenses=MIT
-
 ## install required packages
 ARG             DEBIAN_FRONTEND=noninteractive
 RUN             dpkg --add-architecture i386

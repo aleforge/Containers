@@ -6,51 +6,51 @@ LABEL org.opencontainers.image.description="A Docker image to run Holdfast NAW o
 
 ENV   DEBIAN_FRONTEND noninteractive
 
-RUN   dpkg --add-architecture i386 \
-      && apt-get update \
-      && apt-get upgrade -y \
-      && apt-get install -y \
-      gcc \
-      g++ \
-      libgcc1 \
-      lib32gcc1 \
-      gdb \
-      libc6 \
-      libstdc++6 \
-      git \
-      wget \
-      curl \
-      tar \
-      zip \
-      unzip \
-      binutils \
-      xz-utils \
-      liblzo2-2 \
-      bzip2 \
-      zlib1g \
-      iproute2 \
-      net-tools \
-      netcat \
-      telnet \
-      libatomic1 \
-      libsdl1.2debian \
-      libsdl2-2.0-0 \
-      libfontconfig \
-      libicu60 \
-      libiculx60 \
-      icu-devtools \
-      libunwind8 \
-      libssl1.0.0 \
-      libssl1.0-dev \
-      sqlite3 \
-      libsqlite3-dev \
-      libmariadbclient-dev \
-      libduktape202 \
-      libzip4 \
-      locales \
-      ffmpeg \
-      apt-transport-https \
-      tini 
+RUN               dpkg --add-architecture i386
+RUN               apt update
+RUN               apt -y upgrade
+RUN               apt install -y --no-install-recommends \
+                        gcc \
+                        g++ \
+                        libgcc1 \
+                        lib32gcc1 \
+                        gdb \
+                        libc6 \
+                        libstdc++6 \
+                        git \
+                        wget \
+                        curl \
+                        tar \
+                        zip \
+                        unzip \
+                        binutils \
+                        xz-utils \
+                        liblzo2-2 \
+                        bzip2 \
+                        zlib1g \
+                        iproute2 \
+                        net-tools \
+                        netcat \
+                        telnet \
+                        libatomic1 \
+                        libsdl1.2debian \
+                        libsdl2-2.0-0 \
+                        libfontconfig \
+                        libicu60 \
+                        libiculx60 \
+                        icu-devtools \
+                        libunwind8 \
+                        libssl1.0.0 \
+                        libssl1.0-dev \
+                        sqlite3 \
+                        libsqlite3-dev \
+                        libmariadbclient-dev \
+                        libduktape202 \
+                        libzip4 \
+                        locales \
+                        ffmpeg \
+                        apt-transport-https \
+                        tini 
 
 ## Steamclient.so Link
 RUN ln -s "/home/container/steamcmd/linux64/steamclient.so" "/usr/lib/x86_64-linux-gnu/steamclient.so" 
