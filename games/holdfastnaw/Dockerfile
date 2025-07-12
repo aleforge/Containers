@@ -1,4 +1,4 @@
-FROM  ubuntu:24.04
+FROM  ubuntu:18.04
 
 LABEL author="AleForge Support" maintainer="support@mail.aleforge.net"
 LABEL org.opencontainers.image.source="https://github.com/aleforge/containers/"
@@ -6,46 +6,16 @@ LABEL org.opencontainers.image.description="A Docker image to run Holdfast NAW o
 
 ENV   DEBIAN_FRONTEND noninteractive
 
-RUN               dpkg --add-architecture i386
-RUN               apt update
-RUN               apt -y upgrade
-RUN               apt install -y --no-install-recommends \
-                        gcc \
-                        g++ \
-                        libgcc1 \
-                        gdb \
-                        libc6 \
-                        libstdc++6 \
-                        git \
-                        wget \
-                        curl \
-                        tar \
-                        zip \
-                        unzip \
-                        binutils \
-                        xz-utils \
-                        liblzo2-2 \
-                        bzip2 \
-                        zlib1g \
-                        iproute2 \
-                        net-tools \
-                        telnet \
-                        libatomic1 \
-                        libsdl1.2debian \
-                        libsdl2-2.0-0 \
-                        libfontconfig \
-                        icu-devtools \
-                        libunwind8 \
-                        sqlite3 \
-                        libsqlite3-dev \
-                        libzip4 \
-                        locales \
-                        ffmpeg \
-                        apt-transport-https \
-                        tini \
-                        netcat-traditional \
-                        lib32gcc-s1 \
-                        libmariadb-dev
+## add container user
+RUN   useradd -m -d /home/container -s /bin/bash container
+
+## update base packages
+RUN   apt update \
+ &&   apt upgrade -y
+
+## install dependencies
+RUN   apt install -y gcc g++ libgcc1 lib32gcc1 gdb libc6 libstdc++6 git wget curl tar zip unzip binutils xz-utils liblzo2-2 bzip2 zlib1g iproute2 net-tools netcat telnet libatomic1 libsdl1.2debian libsdl2-2.0-0 \
+      libfontconfig libicu60 libiculx60 icu-devtools libunwind8 libssl1.0.0 libssl1.0-dev sqlite3 libsqlite3-dev libmariadbclient-dev libduktape202 libzip4 locales ffmpeg apt-transport-https 
 
 ## Steamclient.so Link
 RUN ln -s "/home/container/steamcmd/linux64/steamclient.so" "/usr/lib/x86_64-linux-gnu/steamclient.so" 
@@ -54,15 +24,10 @@ RUN ln -s "/home/container/steamcmd/linux64/steamclient.so" "/usr/lib/x86_64-lin
 RUN   update-locale lang=en_US.UTF-8 \
  &&   dpkg-reconfigure --frontend noninteractive locales
 
-# Setup user and working directory
-RUN         useradd -m -d /home/container -s /bin/bash container
-USER        container
-ENV         USER=container HOME=/home/container
-WORKDIR     /home/container
+USER container
+ENV  USER=container HOME=/home/container
 
-STOPSIGNAL  SIGINT
+WORKDIR /home/container
 
-COPY        --chown=container:container ./../entrypoint.sh /entrypoint.sh
-RUN         chmod +x /entrypoint.sh
-ENTRYPOINT  ["/usr/bin/tini", "-g", "--"]
-CMD         ["/entrypoint.sh"]
+COPY  ./entrypoint.sh /entrypoint.sh
+CMD   ["/bin/bash", "/entrypoint.sh"]
