@@ -42,7 +42,10 @@ RUN               apt install -y --no-install-recommends \
                         locales \
                         ffmpeg \
                         apt-transport-https \
-                        tini 
+                        tini \
+                        netcat-traditional \
+                        lib32gcc-s1 \
+                        libmariadb-dev
 
 ## Steamclient.so Link
 RUN ln -s "/home/container/steamcmd/linux64/steamclient.so" "/usr/lib/x86_64-linux-gnu/steamclient.so" 
