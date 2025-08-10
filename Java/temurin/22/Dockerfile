@@ -1,4 +1,4 @@
-FROM        --platform=$TARGETOS/$TARGETARCH eclipse-temurin:22-jdk-noble
+FROM        --platform=$TARGETOS/$TARGETARCH eclipse-temurin:22-jdk-jammy
 
 LABEL author="AleForge Support" maintainer="support@mail.aleforge.net"
 LABEL org.opencontainers.image.source="https://github.com/aleforge/containers/"
@@ -19,12 +19,10 @@ RUN         apt update -y \
                 libfreetype6 \
                 tini \
 				zip \
-				unzip
-
-RUN         rm -rf /usr/bin/dd \
-                && rm -rf /usr/bin/fallocate \
-                && rm -rf /usr/bin/truncate \
-                && rm -rf /usr/bin/xfs_mkfile
+				unzip \
+                && apt upgrade -y \
+                && apt clean \
+                && rm -rf /var/lib/apt/lists/*
 
 
 ## Setup user and working directory

@@ -29,6 +29,7 @@ jobs:
           - 19
           - 21
           - 23
+          - 24
     steps:
       - uses: actions/checkout@v4
       - name: Set up QEMU
