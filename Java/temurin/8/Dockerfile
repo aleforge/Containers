@@ -1,4 +1,4 @@
-FROM        --platform=$TARGETOS/$TARGETARCH eclipse-temurin:8-jdk-noble
+FROM        --platform=$TARGETOS/$TARGETARCH eclipse-temurin:8u312-b07-jdk-focal
 
 LABEL author="AleForge Support" maintainer="support@mail.aleforge.net"
 LABEL org.opencontainers.image.source="https://github.com/aleforge/containers/"
@@ -19,7 +19,10 @@ RUN         apt update -y \
                 libfreetype6 \
                 tini \
 				zip \
-				unzip
+				unzip \
+            && apt upgrade -y \
+            && apt clean \
+            && rm -rf /var/lib/apt/lists/*
 
 ## Setup user and working directory
 RUN         useradd -m -d /home/container -s /bin/bash container
