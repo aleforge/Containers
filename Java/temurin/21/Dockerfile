@@ -1,4 +1,4 @@
-FROM        --platform=$TARGETOS/$TARGETARCH eclipse-temurin:21-jdk-jammy
+FROM        --platform=$TARGETOS/$TARGETARCH eclipse-temurin:21-jdk-noble
 
 LABEL author="AleForge Support" maintainer="support@mail.aleforge.net"
 LABEL org.opencontainers.image.source="https://github.com/aleforge/containers/"
@@ -20,6 +20,7 @@ RUN         apt update -y \
                 tini \
 				zip \
 				unzip \
+                jq \
                 && apt upgrade -y \
                 && apt clean \
                 && rm -rf /var/lib/apt/lists/*
