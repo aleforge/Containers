@@ -1,5 +1,5 @@
 
-FROM     --platform=$TARGETOS/$TARGETARCH debian:bookworm-slim
+FROM     --platform=$TARGETOS/$TARGETARCH debian:trixie-slim
 
 ENV      DEBIAN_FRONTEND=noninteractive
 
