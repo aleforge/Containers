@@ -46,6 +46,11 @@ because these images are tuned to work with our platform and may not function ou
 - [`corekeeper`](/games/corekeeper)
   - `ghcr.io/aleforge/games:corekeeper`
 
+## [Installers](/installers)
+
+- [`Debian`](/installers/debian)
+  - `ghcr.io/aleforge/installer:debian`
+
 ### [Java](/java)
 
 #### [Temurin](/java/Temurin)
