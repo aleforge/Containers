@@ -1,11 +1,11 @@
 # ---------------------------------------------
-# Steam Proton image
+# Steam Debian image
 # ---------------------------------------------
     FROM        debian:bookworm-slim
 
     LABEL author="AleForge Support" maintainer="support@mail.aleforge.net"
     LABEL org.opencontainers.image.source="https://github.com/aleforge/containers/"
-    LABEL org.opencontainers.image.description="A Docker image to run Proton and Steamcmd on AleForge Panel (https://panel.aleforge.net)"     
+    LABEL org.opencontainers.image.description="A Docker image to run Steamcmd on AleForge Panel (https://panel.aleforge.net)"     
 
     ENV         DEBIAN_FRONTEND=noninteractive
 
@@ -43,7 +43,10 @@
                     libsdl2-2.0-0 \
                     libsdl2-2.0-0:i386 \
                     libssl-dev:i386 \
-                    libtinfo6:i386
+                    libtinfo6:i386 \
+                    jq \
+                && apt clean \
+                && rm -rf /var/lib/apt/lists/*
     
     ## install rcon
     RUN         cd /tmp/ \
