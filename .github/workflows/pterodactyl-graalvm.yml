@@ -28,6 +28,7 @@ jobs:
           - jdk17-ee
           - jdk20
           - jdk21
+          - jdk21-ee
           - jdk22
           - jdk23
           - jdk24
