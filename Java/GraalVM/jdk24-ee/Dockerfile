@@ -32,8 +32,6 @@ RUN cd /usr/local/ \
     && tar -xzf /tmp/graalvm.tar.gz --strip-components=1 -C /opt/graalvm \
     && echo "Delete temp file..." && rm /tmp/graalvm.tar.gz
 
-RUN echo "Moving GraalVM..." && mkdir /usr/local/graalvm && mv /usr/local/${GRAALVM_FOLDER_NAME}/* /usr/local/graalvm && rm -rf /usr/local/${GRAALVM_FOLDER_NAME}
-
 RUN echo "Setting GraalVM environment variables..."
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US:en
