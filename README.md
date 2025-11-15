@@ -88,12 +88,14 @@ because these images are tuned to work with our platform and may not function ou
   - `ghcr.io/aleforge/containers:graalvm-jdk20`
 - [`java21`](/GraalVM/jdk21)
   - `ghcr.io/aleforge/containers:graalvm-jdk21`
+  - `ghcr.io/aleforge/containers:graalvm-jdk21-ee`
 - [`java22`](/GraalVM/jdk22)
   - `ghcr.io/aleforge/containers:graalvm-jdk22`
 - [`java23`](/GraalVM/jdk23)
   - `ghcr.io/aleforge/containers:graalvm-jdk23`
 - [`java24`](/GraalVM/jdk24)
   - `ghcr.io/aleforge/containers:graalvm-jdk24`
+  - `ghcr.io/aleforge/containers:graalvm-jdk24-ee`
 
 #### [OpenJDK](/java/OpenJDK)
 
