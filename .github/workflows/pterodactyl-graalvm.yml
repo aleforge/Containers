@@ -2,14 +2,13 @@ name: Java GraalVM
 
 on:
   push:
-    branches: 
+    branches:
       - main
     paths:
       - Java/GraalVM/**
   workflow_dispatch:
   schedule:
     - cron: "0 0 * * 1"
-
 
 jobs:
   push:
@@ -32,6 +31,7 @@ jobs:
           - jdk22
           - jdk23
           - jdk24
+          - jdk24-ee
     steps:
       - uses: actions/checkout@v4
       - name: Set up QEMU

@@ -71,6 +71,8 @@ because these images are tuned to work with our platform and may not function ou
   * `ghcr.io/aleforge/containers:java-22`
 * [`java23`](/java/23)
   * `ghcr.io/aleforge/containers:java-23`
+* [`java24`](/java/24)
+  * `ghcr.io/aleforge/containers:java-24`
 
 #### [GraalVM](/java/GraalVM)
 
