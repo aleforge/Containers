@@ -1,4 +1,4 @@
-FROM 		--platform=$TARGETOS/$TARGETARCH ghcr.io/aleforge/containers:java-25
+FROM debian:13-slim
 
 LABEL author="AleForge Support" maintainer="support@mail.aleforge.net"
 LABEL org.opencontainers.image.source="https://github.com/aleforge/containers/"
