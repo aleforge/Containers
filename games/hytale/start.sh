@@ -112,79 +112,119 @@ fi
 # ─────────────────────────────────────────────
 # Authenticate and create game session tokens
 # ─────────────────────────────────────────────
-echo -e "${YELLOW}Starting device code authentication...${NC}"
-
-# Step 1: Request device code
-DEVICE_RESPONSE=$(curl -s -X POST "https://oauth.accounts.hytale.com/oauth2/device/auth" \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "client_id=hytale-server" \
-  -d "scope=openid offline auth:server")
-
-DEVICE_CODE=$(echo "$DEVICE_RESPONSE" | grep -o '"device_code":"[^"]*"' | cut -d'"' -f4)
-USER_CODE=$(echo "$DEVICE_RESPONSE" | grep -o '"user_code":"[^"]*"' | cut -d'"' -f4)
-VERIFICATION_URI=$(echo "$DEVICE_RESPONSE" | grep -o '"verification_uri":"[^"]*"' | cut -d'"' -f4)
-VERIFICATION_URI_COMPLETE=$(echo "$DEVICE_RESPONSE" | grep -o '"verification_uri_complete":"[^"]*"' | cut -d'"' -f4)
-EXPIRES_IN=$(echo "$DEVICE_RESPONSE" | grep -o '"expires_in":[0-9]*' | cut -d':' -f2)
-POLL_INTERVAL=$(echo "$DEVICE_RESPONSE" | grep -o '"interval":[0-9]*' | cut -d':' -f2)
-
-if [ -z "$DEVICE_CODE" ]; then
-  echo -e "${RED}ERROR: Could not get device code${NC}"
-  echo -e "${RED}Response: $DEVICE_RESPONSE${NC}"
-  exit 1
-fi
-
-# Step 2: Display instructions to user
-echo
-echo -e "${BLUE}====================================================================${NC}"
-echo -e "${YELLOW}DEVICE AUTHORIZATION REQUIRED${NC}"
-echo -e "${BLUE}====================================================================${NC}"
-echo -e "${GREEN}Visit: ${VERIFICATION_URI_COMPLETE}${NC}"
-echo
-echo -e "${YELLOW}Or manually visit: ${VERIFICATION_URI}${NC}"
-echo -e "${YELLOW}And enter code: ${USER_CODE}${NC}"
-echo -e "${BLUE}====================================================================${NC}"
-echo -e "${YELLOW}Waiting for authorization (expires in ${EXPIRES_IN} seconds)...${NC}"
-echo
-
-# Step 3: Poll for token
+REFRESH_TOKEN_FILE=".hytale-refresh-token"
 ACCESS_TOKEN=""
 REFRESH_TOKEN=""
-MAX_ATTEMPTS=$((EXPIRES_IN / POLL_INTERVAL))
-ATTEMPT=0
 
-while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
-  sleep $POLL_INTERVAL
+# Check if we have a stored refresh token
+if [ -f "$REFRESH_TOKEN_FILE" ]; then
+  echo -e "${YELLOW}Using stored refresh token...${NC}"
+  REFRESH_TOKEN=$(cat "$REFRESH_TOKEN_FILE")
   
+  # Get new access token using refresh token
   TOKEN_RESPONSE=$(curl -s -X POST "https://oauth.accounts.hytale.com/oauth2/token" \
     -H "Content-Type: application/x-www-form-urlencoded" \
     -d "client_id=hytale-server" \
-    -d "grant_type=urn:ietf:params:oauth:grant-type:device_code" \
-    -d "device_code=$DEVICE_CODE")
+    -d "grant_type=refresh_token" \
+    -d "refresh_token=$REFRESH_TOKEN")
   
-  # Check if we got an access token
   ACCESS_TOKEN=$(echo "$TOKEN_RESPONSE" | grep -o '"access_token":"[^"]*"' | cut -d'"' -f4)
+  NEW_REFRESH_TOKEN=$(echo "$TOKEN_RESPONSE" | grep -o '"refresh_token":"[^"]*"' | cut -d'"' -f4)
   
-  if [ -n "$ACCESS_TOKEN" ]; then
-    REFRESH_TOKEN=$(echo "$TOKEN_RESPONSE" | grep -o '"refresh_token":"[^"]*"' | cut -d'"' -f4)
-    echo -e "${GREEN}Authentication successful!${NC}"
-    break
+  # Update refresh token if we got a new one
+  if [ -n "$NEW_REFRESH_TOKEN" ]; then
+    echo "$NEW_REFRESH_TOKEN" > "$REFRESH_TOKEN_FILE"
+    REFRESH_TOKEN="$NEW_REFRESH_TOKEN"
   fi
   
-  # Check for errors
-  ERROR=$(echo "$TOKEN_RESPONSE" | grep -o '"error":"[^"]*"' | cut -d'"' -f4)
+  if [ -z "$ACCESS_TOKEN" ]; then
+    echo -e "${YELLOW}Refresh token expired or invalid, starting new authentication...${NC}"
+    rm -f "$REFRESH_TOKEN_FILE"
+  else
+    echo -e "${GREEN}Access token obtained from refresh token${NC}"
+  fi
+fi
+
+# If we don't have an access token yet, do device code flow
+if [ -z "$ACCESS_TOKEN" ]; then
+  echo -e "${YELLOW}Starting device code authentication...${NC}"
   
-  if [ "$ERROR" != "authorization_pending" ] && [ -n "$ERROR" ]; then
-    echo -e "${RED}ERROR: $ERROR${NC}"
-    echo -e "${RED}Response: $TOKEN_RESPONSE${NC}"
+  # Step 1: Request device code
+  DEVICE_RESPONSE=$(curl -s -X POST "https://oauth.accounts.hytale.com/oauth2/device/auth" \
+    -H "Content-Type: application/x-www-form-urlencoded" \
+    -d "client_id=hytale-server" \
+    -d "scope=openid offline auth:server")
+  
+  DEVICE_CODE=$(echo "$DEVICE_RESPONSE" | grep -o '"device_code":"[^"]*"' | cut -d'"' -f4)
+  USER_CODE=$(echo "$DEVICE_RESPONSE" | grep -o '"user_code":"[^"]*"' | cut -d'"' -f4)
+  VERIFICATION_URI=$(echo "$DEVICE_RESPONSE" | grep -o '"verification_uri":"[^"]*"' | cut -d'"' -f4)
+  VERIFICATION_URI_COMPLETE=$(echo "$DEVICE_RESPONSE" | grep -o '"verification_uri_complete":"[^"]*"' | cut -d'"' -f4)
+  EXPIRES_IN=$(echo "$DEVICE_RESPONSE" | grep -o '"expires_in":[0-9]*' | cut -d':' -f2)
+  POLL_INTERVAL=$(echo "$DEVICE_RESPONSE" | grep -o '"interval":[0-9]*' | cut -d':' -f2)
+  
+  if [ -z "$DEVICE_CODE" ]; then
+    echo -e "${RED}ERROR: Could not get device code${NC}"
+    echo -e "${RED}Response: $DEVICE_RESPONSE${NC}"
     exit 1
   fi
   
-  ATTEMPT=$((ATTEMPT + 1))
-done
-
-if [ -z "$ACCESS_TOKEN" ]; then
-  echo -e "${RED}ERROR: Authorization timed out${NC}"
-  exit 1
+  # Step 2: Display instructions to user
+  echo
+  echo -e "${BLUE}====================================================================${NC}"
+  echo -e "${YELLOW}DEVICE AUTHORIZATION REQUIRED${NC}"
+  echo -e "${BLUE}====================================================================${NC}"
+  echo -e "${GREEN}Visit: ${VERIFICATION_URI_COMPLETE}${NC}"
+  echo
+  echo -e "${YELLOW}Or manually visit: ${VERIFICATION_URI}${NC}"
+  echo -e "${YELLOW}And enter code: ${USER_CODE}${NC}"
+  echo -e "${BLUE}====================================================================${NC}"
+  echo -e "${YELLOW}Waiting for authorization (expires in ${EXPIRES_IN} seconds)...${NC}"
+  echo
+  
+  # Step 3: Poll for token
+  MAX_ATTEMPTS=$((EXPIRES_IN / POLL_INTERVAL))
+  ATTEMPT=0
+  
+  while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+    sleep $POLL_INTERVAL
+    
+    TOKEN_RESPONSE=$(curl -s -X POST "https://oauth.accounts.hytale.com/oauth2/token" \
+      -H "Content-Type: application/x-www-form-urlencoded" \
+      -d "client_id=hytale-server" \
+      -d "grant_type=urn:ietf:params:oauth:grant-type:device_code" \
+      -d "device_code=$DEVICE_CODE")
+    
+    # Check if we got an access token
+    ACCESS_TOKEN=$(echo "$TOKEN_RESPONSE" | grep -o '"access_token":"[^"]*"' | cut -d'"' -f4)
+    
+    if [ -n "$ACCESS_TOKEN" ]; then
+      REFRESH_TOKEN=$(echo "$TOKEN_RESPONSE" | grep -o '"refresh_token":"[^"]*"' | cut -d'"' -f4)
+      echo -e "${GREEN}Authentication successful!${NC}"
+      
+      # Store refresh token for future use
+      if [ -n "$REFRESH_TOKEN" ]; then
+        echo "$REFRESH_TOKEN" > "$REFRESH_TOKEN_FILE"
+        echo -e "${GREEN}Refresh token stored for future use${NC}"
+      fi
+      break
+    fi
+    
+    # Check for errors
+    ERROR=$(echo "$TOKEN_RESPONSE" | grep -o '"error":"[^"]*"' | cut -d'"' -f4)
+    
+    if [ "$ERROR" != "authorization_pending" ] && [ -n "$ERROR" ]; then
+      echo -e "${RED}ERROR: $ERROR${NC}"
+      echo -e "${RED}Response: $TOKEN_RESPONSE${NC}"
+      exit 1
+    fi
+    
+    ATTEMPT=$((ATTEMPT + 1))
+  done
+  
+  if [ -z "$ACCESS_TOKEN" ]; then
+    echo -e "${RED}ERROR: Authorization timed out${NC}"
+    exit 1
+  fi
 fi
 
 # Step 4: Get available profiles
