@@ -298,7 +298,8 @@ echo
 
 exec java \
   -Xms128M \
-  -Xmx${SERVER_MEMORY}M \
+  -XX:MaxRAMPercentage=85.0 \
+  #-Xmx${SERVER_MEMORY}M \
   -jar Server/HytaleServer.jar \
   --assets Assets.zip \
   --auth-mode "${AUTH_MODE}" \
