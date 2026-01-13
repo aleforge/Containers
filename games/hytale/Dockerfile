@@ -17,6 +17,7 @@ RUN         apt update -y \
                 openssl \
                 git \
                 tar \
+                gnupg \
                 sqlite3 \
                 fontconfig \
                 tzdata \
