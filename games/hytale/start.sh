@@ -298,7 +298,7 @@ echo
 
 exec java \
   -Xms128M \
-  -Xmx${SERVER_MEMORY}M \
+  -Xmx$((SERVER_MEMORY * 90 / 100))M \
   -jar Server/HytaleServer.jar \
   --assets Assets.zip \
   --auth-mode "${AUTH_MODE}" \
