@@ -4,25 +4,6 @@ set -e
 cd /home/container || exit 1
 
 # ─────────────────────────────────────────────
-# Colors
-# ─────────────────────────────────────────────
-BLUE='\033[1;34m'
-GREEN='\033[1;32m'
-YELLOW='\033[1;33m'
-RED='\033[1;31m'
-NC='\033[0m'
-
-# Information output
-echo -e "${BLUE}---------------------------------------------------------------------${NC}"
-echo -e "${YELLOW}Hytale Image from AleForge${NC}"
-echo -e "${RED}THIS IMAGE IS LICENSED UNDER AGPLv3${NC}"
-echo -e "${BLUE}---------------------------------------------------------------------${NC}"
-echo -e "${YELLOW}"${YELLOW}Linux Distribution: ${RED} $(. /etc/os-release ; echo $PRETTY_NAME)${NC}" $(cat /etc/debian_version)${NC}"
-echo -e "${YELLOW}Current timezone: $(cat /etc/timezone)${NC}"
-echo -e "${YELLOW}Java Version:${NC} ${RED} $(java -version)${NC}"
-echo -e "${BLUE}---------------------------------------------------------------------${NC}"
-
-# ─────────────────────────────────────────────
 # Egg variables / defaults
 # ─────────────────────────────────────────────
 SERVER_PORT="${SERVER_PORT:-5520}"
