@@ -27,14 +27,10 @@ echo -e "${BLUE}----------------------------------------------------------------
 
 set -e
 
-cd /home/container
+#!/bin/bash
+cd /home/container || exit 1
 
-# If HYTALE_SERVER_SESSION_TOKEN isn't set, assume the user will log in themselves, rather than a host's GSP
-if [[ -z "$HYTALE_SERVER_SESSION_TOKEN" ]]; then
-	./hytale-downloader/hytale-downloader-linux -patchline "$HYTALE_PATCHLINE"
-fi
+echo "Java version:"
+java -version
 
-unzip ./20*.zip
-rm ./20*.zip
-
-/java.sh $@
+eval '/start.sh'
