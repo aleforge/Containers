@@ -23,17 +23,12 @@ RUN         apt update -y \
                 tzdata \
                 iproute2 \
                 libfreetype6 \
+                bash \
+                lsb-release \
                 tini \
-				zip \
 				unzip \
                 && apt upgrade -y \
-                && apt clean \
                 && rm -rf /var/lib/apt/lists/*
-
-RUN         rm -rf /usr/bin/dd \
-                && rm -rf /usr/bin/fallocate \
-                && rm -rf /usr/bin/truncate \
-                && rm -rf /usr/bin/xfs_mkfile
 
 # Add Adoptium (Eclipse Temurin) repository
 RUN mkdir -p /etc/apt/keyrings && \
