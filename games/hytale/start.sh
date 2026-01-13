@@ -110,78 +110,120 @@ if [ ! -f Assets.zip ]; then
 fi
 
 # ─────────────────────────────────────────────
-# Create game session tokens
+# Authenticate and create game session tokens
 # ─────────────────────────────────────────────
-if [ -f .hytale-downloader-credentials.json ]; then
-  echo -e "${YELLOW}Creating game session...${NC}"
+echo -e "${YELLOW}Starting device code authentication...${NC}"
+
+# Step 1: Request device code
+DEVICE_RESPONSE=$(curl -s -X POST "https://oauth.accounts.hytale.com/oauth2/device/auth" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "client_id=hytale-server" \
+  -d "scope=openid offline auth:server")
+
+DEVICE_CODE=$(echo "$DEVICE_RESPONSE" | grep -o '"device_code":"[^"]*"' | cut -d'"' -f4)
+USER_CODE=$(echo "$DEVICE_RESPONSE" | grep -o '"user_code":"[^"]*"' | cut -d'"' -f4)
+VERIFICATION_URI=$(echo "$DEVICE_RESPONSE" | grep -o '"verification_uri":"[^"]*"' | cut -d'"' -f4)
+VERIFICATION_URI_COMPLETE=$(echo "$DEVICE_RESPONSE" | grep -o '"verification_uri_complete":"[^"]*"' | cut -d'"' -f4)
+EXPIRES_IN=$(echo "$DEVICE_RESPONSE" | grep -o '"expires_in":[0-9]*' | cut -d':' -f2)
+POLL_INTERVAL=$(echo "$DEVICE_RESPONSE" | grep -o '"interval":[0-9]*' | cut -d':' -f2)
+
+if [ -z "$DEVICE_CODE" ]; then
+  echo -e "${RED}ERROR: Could not get device code${NC}"
+  echo -e "${RED}Response: $DEVICE_RESPONSE${NC}"
+  exit 1
+fi
+
+# Step 2: Display instructions to user
+echo
+echo -e "${BLUE}====================================================================${NC}"
+echo -e "${YELLOW}DEVICE AUTHORIZATION REQUIRED${NC}"
+echo -e "${BLUE}====================================================================${NC}"
+echo -e "${GREEN}Visit: ${VERIFICATION_URI_COMPLETE}${NC}"
+echo
+echo -e "${YELLOW}Or manually visit: ${VERIFICATION_URI}${NC}"
+echo -e "${YELLOW}And enter code: ${USER_CODE}${NC}"
+echo -e "${BLUE}====================================================================${NC}"
+echo -e "${YELLOW}Waiting for authorization (expires in ${EXPIRES_IN} seconds)...${NC}"
+echo
+
+# Step 3: Poll for token
+ACCESS_TOKEN=""
+REFRESH_TOKEN=""
+MAX_ATTEMPTS=$((EXPIRES_IN / POLL_INTERVAL))
+ATTEMPT=0
+
+while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+  sleep $POLL_INTERVAL
   
-  # Extract tokens from credentials file
-  ACCESS_TOKEN=$(grep -o '"access_token":"[^"]*"' .hytale-downloader-credentials.json | cut -d'"' -f4)
-  REFRESH_TOKEN=$(grep -o '"refresh_token":"[^"]*"' .hytale-downloader-credentials.json | cut -d'"' -f4)
-  
-  if [ -z "$REFRESH_TOKEN" ]; then
-    echo -e "${RED}ERROR: Could not extract refresh token from .hytale-downloader-credentials.json${NC}"
-    exit 1
-  fi
-  
-  # Refresh the access token first
-  echo -e "${YELLOW}Refreshing access token...${NC}"
   TOKEN_RESPONSE=$(curl -s -X POST "https://oauth.accounts.hytale.com/oauth2/token" \
     -H "Content-Type: application/x-www-form-urlencoded" \
     -d "client_id=hytale-server" \
-    -d "grant_type=refresh_token" \
-    -d "refresh_token=$REFRESH_TOKEN")
+    -d "grant_type=urn:ietf:params:oauth:grant-type:device_code" \
+    -d "device_code=$DEVICE_CODE")
   
-  # Extract new access token
+  # Check if we got an access token
   ACCESS_TOKEN=$(echo "$TOKEN_RESPONSE" | grep -o '"access_token":"[^"]*"' | cut -d'"' -f4)
   
-  if [ -z "$ACCESS_TOKEN" ]; then
-    echo -e "${RED}ERROR: Could not refresh access token${NC}"
+  if [ -n "$ACCESS_TOKEN" ]; then
+    REFRESH_TOKEN=$(echo "$TOKEN_RESPONSE" | grep -o '"refresh_token":"[^"]*"' | cut -d'"' -f4)
+    echo -e "${GREEN}Authentication successful!${NC}"
+    break
+  fi
+  
+  # Check for errors
+  ERROR=$(echo "$TOKEN_RESPONSE" | grep -o '"error":"[^"]*"' | cut -d'"' -f4)
+  
+  if [ "$ERROR" != "authorization_pending" ] && [ -n "$ERROR" ]; then
+    echo -e "${RED}ERROR: $ERROR${NC}"
     echo -e "${RED}Response: $TOKEN_RESPONSE${NC}"
     exit 1
   fi
   
-  echo -e "${GREEN}Access token refreshed${NC}"
-  
-  # Get available profiles
-  PROFILE_RESPONSE=$(curl -s -X GET "https://account-data.hytale.com/my-account/get-profiles" \
-    -H "Authorization: Bearer $ACCESS_TOKEN")
-  
-  # Extract profile UUID (first profile)
-  PROFILE_UUID=$(echo "$PROFILE_RESPONSE" | grep -o '"uuid":"[^"]*"' | head -n1 | cut -d'"' -f4)
-  
-  if [ -z "$PROFILE_UUID" ]; then
-    echo -e "${RED}ERROR: Could not extract profile UUID${NC}"
-    echo -e "${RED}Response: $PROFILE_RESPONSE${NC}"
-    exit 1
-  fi
-  
-  echo -e "${GREEN}Profile UUID: ${PROFILE_UUID}${NC}"
-  
-  # Create game session
-  SESSION_RESPONSE=$(curl -s -X POST "https://sessions.hytale.com/game-session/new" \
-    -H "Authorization: Bearer $ACCESS_TOKEN" \
-    -H "Content-Type: application/json" \
-    -d "{\"uuid\": \"$PROFILE_UUID\"}")
-  
-  # Extract session and identity tokens
-  SESSION_TOKEN=$(echo "$SESSION_RESPONSE" | grep -o '"sessionToken":"[^"]*"' | cut -d'"' -f4)
-  IDENTITY_TOKEN=$(echo "$SESSION_RESPONSE" | grep -o '"identityToken":"[^"]*"' | cut -d'"' -f4)
-  
-  if [ -z "$SESSION_TOKEN" ] || [ -z "$IDENTITY_TOKEN" ]; then
-    echo -e "${RED}ERROR: Could not extract session tokens${NC}"
-    echo -e "${RED}Response: $SESSION_RESPONSE${NC}"
-    exit 1
-  fi
-  
-  # Export environment variables
-  export HYTALE_SERVER_SESSION_TOKEN="$SESSION_TOKEN"
-  export HYTALE_SERVER_IDENTITY_TOKEN="$IDENTITY_TOKEN"
-  
-  echo -e "${GREEN}Game session created successfully!${NC}"
-else
-  echo -e "${YELLOW}No credentials file found, skipping session creation${NC}"
+  ATTEMPT=$((ATTEMPT + 1))
+done
+
+if [ -z "$ACCESS_TOKEN" ]; then
+  echo -e "${RED}ERROR: Authorization timed out${NC}"
+  exit 1
 fi
+
+# Step 4: Get available profiles
+echo -e "${YELLOW}Creating game session...${NC}"
+PROFILE_RESPONSE=$(curl -s -X GET "https://account-data.hytale.com/my-account/get-profiles" \
+  -H "Authorization: Bearer $ACCESS_TOKEN")
+
+# Extract profile UUID (first profile)
+PROFILE_UUID=$(echo "$PROFILE_RESPONSE" | grep -o '"uuid":"[^"]*"' | head -n1 | cut -d'"' -f4)
+
+if [ -z "$PROFILE_UUID" ]; then
+  echo -e "${RED}ERROR: Could not extract profile UUID${NC}"
+  echo -e "${RED}Response: $PROFILE_RESPONSE${NC}"
+  exit 1
+fi
+
+echo -e "${GREEN}Profile UUID: ${PROFILE_UUID}${NC}"
+
+# Step 5: Create game session
+SESSION_RESPONSE=$(curl -s -X POST "https://sessions.hytale.com/game-session/new" \
+  -H "Authorization: Bearer $ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d "{\"uuid\": \"$PROFILE_UUID\"}")
+
+# Extract session and identity tokens
+SESSION_TOKEN=$(echo "$SESSION_RESPONSE" | grep -o '"sessionToken":"[^"]*"' | cut -d'"' -f4)
+IDENTITY_TOKEN=$(echo "$SESSION_RESPONSE" | grep -o '"identityToken":"[^"]*"' | cut -d'"' -f4)
+
+if [ -z "$SESSION_TOKEN" ] || [ -z "$IDENTITY_TOKEN" ]; then
+  echo -e "${RED}ERROR: Could not extract session tokens${NC}"
+  echo -e "${RED}Response: $SESSION_RESPONSE${NC}"
+  exit 1
+fi
+
+# Export environment variables
+export HYTALE_SERVER_SESSION_TOKEN="$SESSION_TOKEN"
+export HYTALE_SERVER_IDENTITY_TOKEN="$IDENTITY_TOKEN"
+
+echo -e "${GREEN}Game session created successfully!${NC}"
 
 # ─────────────────────────────────────────────
 # Start server
