@@ -115,13 +115,33 @@ fi
 if [ -f .hytale-downloader-credentials.json ]; then
   echo -e "${YELLOW}Creating game session...${NC}"
   
-  # Extract access token from credentials file
+  # Extract tokens from credentials file
   ACCESS_TOKEN=$(grep -o '"access_token":"[^"]*"' .hytale-downloader-credentials.json | cut -d'"' -f4)
+  REFRESH_TOKEN=$(grep -o '"refresh_token":"[^"]*"' .hytale-downloader-credentials.json | cut -d'"' -f4)
   
-  if [ -z "$ACCESS_TOKEN" ]; then
-    echo -e "${RED}ERROR: Could not extract access token from .hytale-downloader-credentials.json${NC}"
+  if [ -z "$REFRESH_TOKEN" ]; then
+    echo -e "${RED}ERROR: Could not extract refresh token from .hytale-downloader-credentials.json${NC}"
     exit 1
   fi
+  
+  # Refresh the access token first
+  echo -e "${YELLOW}Refreshing access token...${NC}"
+  TOKEN_RESPONSE=$(curl -s -X POST "https://oauth.accounts.hytale.com/oauth2/token" \
+    -H "Content-Type: application/x-www-form-urlencoded" \
+    -d "client_id=hytale-server" \
+    -d "grant_type=refresh_token" \
+    -d "refresh_token=$REFRESH_TOKEN")
+  
+  # Extract new access token
+  ACCESS_TOKEN=$(echo "$TOKEN_RESPONSE" | grep -o '"access_token":"[^"]*"' | cut -d'"' -f4)
+  
+  if [ -z "$ACCESS_TOKEN" ]; then
+    echo -e "${RED}ERROR: Could not refresh access token${NC}"
+    echo -e "${RED}Response: $TOKEN_RESPONSE${NC}"
+    exit 1
+  fi
+  
+  echo -e "${GREEN}Access token refreshed${NC}"
   
   # Get available profiles
   PROFILE_RESPONSE=$(curl -s -X GET "https://account-data.hytale.com/my-account/get-profiles" \
