@@ -34,7 +34,7 @@ if [[ -z "$HYTALE_SERVER_SESSION_TOKEN" ]]; then
 	./hytale-downloader/hytale-downloader-linux -patchline "$HYTALE_PATCHLINE"
 fi
 
-unzip ./*.zip
-rm ./*.zip
+unzip ./20*.zip
+rm ./20*.zip
 
 /java.sh $@
