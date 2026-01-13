@@ -102,14 +102,48 @@ fi
 # ─────────────────────────────────────────────
 # Authenticate and create game session tokens
 # ─────────────────────────────────────────────
-REFRESH_TOKEN_FILE=".hytale-refresh-token"
+REFRESH_TOKEN_FILE=".hytale-refresh-token.enc"
 ACCESS_TOKEN=""
 REFRESH_TOKEN=""
+
+# Encryption key - uses environment variable or generates from machine-specific data
+ENCRYPTION_KEY="${HYTALE_ENCRYPTION_KEY:-$(hostname)-$(cat /proc/sys/kernel/random/uuid | head -c 32)}"
+
+# Helper function to encrypt refresh token
+encrypt_token() {
+  echo -n "$1" | openssl enc -aes-256-cbc -a -pbkdf2 -pass pass:"$ENCRYPTION_KEY" 2>/dev/null
+}
+
+# Helper function to decrypt refresh token
+decrypt_token() {
+  echo -n "$1" | openssl enc -aes-256-cbc -a -d -pbkdf2 -pass pass:"$ENCRYPTION_KEY" 2>/dev/null
+}
+
+# Migrate existing unencrypted token to encrypted storage
+OLD_REFRESH_TOKEN_FILE=".hytale-refresh-token"
+if [ -f "$OLD_REFRESH_TOKEN_FILE" ] && [ ! -f "$REFRESH_TOKEN_FILE" ]; then
+  echo -e "${YELLOW}Migrating existing refresh token to encrypted storage...${NC}"
+  OLD_TOKEN=$(cat "$OLD_REFRESH_TOKEN_FILE")
+  
+  if [ -n "$OLD_TOKEN" ]; then
+    # Encrypt and save the old token
+    encrypt_token "$OLD_TOKEN" > "$REFRESH_TOKEN_FILE"
+    
+    # Securely delete the old unencrypted token
+    shred -u "$OLD_REFRESH_TOKEN_FILE" 2>/dev/null || rm -f "$OLD_REFRESH_TOKEN_FILE"
+    
+    echo -e "${GREEN}Migration complete - old token encrypted and deleted${NC}"
+  else
+    # Empty file, just remove it
+    rm -f "$OLD_REFRESH_TOKEN_FILE"
+  fi
+fi
 
 # Check if we have a stored refresh token
 if [ -f "$REFRESH_TOKEN_FILE" ]; then
   echo -e "${YELLOW}Using stored refresh token...${NC}"
-  REFRESH_TOKEN=$(cat "$REFRESH_TOKEN_FILE")
+  ENCRYPTED_TOKEN=$(cat "$REFRESH_TOKEN_FILE")
+  REFRESH_TOKEN=$(decrypt_token "$ENCRYPTED_TOKEN")
   
   # Get new access token using refresh token
   TOKEN_RESPONSE=$(curl -s -X POST "https://oauth.accounts.hytale.com/oauth2/token" \
@@ -123,7 +157,7 @@ if [ -f "$REFRESH_TOKEN_FILE" ]; then
   
   # Update refresh token if we got a new one
   if [ -n "$NEW_REFRESH_TOKEN" ]; then
-    echo "$NEW_REFRESH_TOKEN" > "$REFRESH_TOKEN_FILE"
+    encrypt_token "$NEW_REFRESH_TOKEN" > "$REFRESH_TOKEN_FILE"
     REFRESH_TOKEN="$NEW_REFRESH_TOKEN"
   fi
   
@@ -193,8 +227,8 @@ if [ -z "$ACCESS_TOKEN" ]; then
       
       # Store refresh token for future use
       if [ -n "$REFRESH_TOKEN" ]; then
-        echo "$REFRESH_TOKEN" > "$REFRESH_TOKEN_FILE"
-        echo -e "${GREEN}Refresh token stored for future use${NC}"
+        encrypt_token "$REFRESH_TOKEN" > "$REFRESH_TOKEN_FILE"
+        echo -e "${GREEN}Refresh token encrypted and stored for future use${NC}"
       fi
       break
     fi
