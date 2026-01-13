@@ -2,14 +2,13 @@ name: Games Specific Images
 
 on:
   push:
-    branches: 
+    branches:
       - main
     paths:
       - games/**
   workflow_dispatch:
   schedule:
     - cron: "0 0 * * 1"
-
 
 jobs:
   push:
@@ -29,6 +28,7 @@ jobs:
           - aloft
           - valheim
           - corekeeper
+          - hytale
     steps:
       - uses: actions/checkout@v4
       - name: Set up QEMU

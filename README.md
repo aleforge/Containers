@@ -45,6 +45,10 @@ because these images are tuned to work with our platform and may not function ou
   - `ghcr.io/aleforge/games:valheim`
 - [`corekeeper`](/games/corekeeper)
   - `ghcr.io/aleforge/games:corekeeper`
+- [`Hytale`](/games/hytale)
+  - `ghcr.io/aleforge/games:hytale`
+- [`Palworld`](/games/palworld)
+  - `ghcr.io/aleforge/games:palworld`
 
 ## [Installers](/installers)
 
@@ -73,6 +77,8 @@ because these images are tuned to work with our platform and may not function ou
   * `ghcr.io/aleforge/containers:java-23`
 * [`java24`](/java/24)
   * `ghcr.io/aleforge/containers:java-24`
+* [`java25`](/java/25)
+  * `ghcr.io/aleforge/containers:java-25`
 
 #### [GraalVM](/java/GraalVM)
 

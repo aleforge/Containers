@@ -2,14 +2,13 @@ name: Java
 
 on:
   push:
-    branches: 
+    branches:
       - main
     paths:
       - Java/temurin/**
   workflow_dispatch:
   schedule:
     - cron: "0 0 * * 1"
-
 
 jobs:
   push:
@@ -30,6 +29,7 @@ jobs:
           - 21
           - 23
           - 24
+          - 25
     steps:
       - uses: actions/checkout@v4
       - name: Set up QEMU
