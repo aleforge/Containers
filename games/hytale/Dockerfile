@@ -9,16 +9,30 @@ ENV JAVA_HOME=/usr/lib/jvm/temurin-25-jdk
 ENV PATH="$JAVA_HOME/bin:$PATH"
 
 # Required packages for Pterodactyl
-RUN apt-get update && apt-get install -y \
-    ca-certificates \
-    curl \
-    gnupg \
-    lsb-release \
-    tzdata \
-    bash \
-    openssl \
-    unzip \
-    && rm -rf /var/lib/apt/lists/*
+RUN         apt update -y \
+            && apt install -y \
+                curl \
+                lsof \
+                ca-certificates \
+                openssl \
+                git \
+                tar \
+                sqlite3 \
+                fontconfig \
+                tzdata \
+                iproute2 \
+                libfreetype6 \
+                tini \
+				zip \
+				unzip \
+                && apt upgrade -y \
+                && apt clean \
+                && rm -rf /var/lib/apt/lists/*
+
+RUN         rm -rf /usr/bin/dd \
+                && rm -rf /usr/bin/fallocate \
+                && rm -rf /usr/bin/truncate \
+                && rm -rf /usr/bin/xfs_mkfile
 
 # Add Adoptium (Eclipse Temurin) repository
 RUN mkdir -p /etc/apt/keyrings && \
@@ -43,5 +57,7 @@ COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
+
+ENTRYPOINT    ["/usr/bin/tini", "-g", "--"]
 
 CMD ["/entrypoint.sh"]
