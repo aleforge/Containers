@@ -110,6 +110,60 @@ if [ ! -f Assets.zip ]; then
 fi
 
 # ─────────────────────────────────────────────
+# Create game session tokens
+# ─────────────────────────────────────────────
+if [ -f .hytale-downloader-credentials.json ]; then
+  echo -e "${YELLOW}Creating game session...${NC}"
+  
+  # Extract access token from credentials file
+  ACCESS_TOKEN=$(grep -o '"access_token":"[^"]*"' .hytale-downloader-credentials.json | cut -d'"' -f4)
+  
+  if [ -z "$ACCESS_TOKEN" ]; then
+    echo -e "${RED}ERROR: Could not extract access token from .hytale-downloader-credentials.json${NC}"
+    exit 1
+  fi
+  
+  # Get available profiles
+  PROFILE_RESPONSE=$(curl -s -X GET "https://account-data.hytale.com/my-account/get-profiles" \
+    -H "Authorization: Bearer $ACCESS_TOKEN")
+  
+  # Extract profile UUID (first profile)
+  PROFILE_UUID=$(echo "$PROFILE_RESPONSE" | grep -o '"uuid":"[^"]*"' | head -n1 | cut -d'"' -f4)
+  
+  if [ -z "$PROFILE_UUID" ]; then
+    echo -e "${RED}ERROR: Could not extract profile UUID${NC}"
+    echo -e "${RED}Response: $PROFILE_RESPONSE${NC}"
+    exit 1
+  fi
+  
+  echo -e "${GREEN}Profile UUID: ${PROFILE_UUID}${NC}"
+  
+  # Create game session
+  SESSION_RESPONSE=$(curl -s -X POST "https://sessions.hytale.com/game-session/new" \
+    -H "Authorization: Bearer $ACCESS_TOKEN" \
+    -H "Content-Type: application/json" \
+    -d "{\"uuid\": \"$PROFILE_UUID\"}")
+  
+  # Extract session and identity tokens
+  SESSION_TOKEN=$(echo "$SESSION_RESPONSE" | grep -o '"sessionToken":"[^"]*"' | cut -d'"' -f4)
+  IDENTITY_TOKEN=$(echo "$SESSION_RESPONSE" | grep -o '"identityToken":"[^"]*"' | cut -d'"' -f4)
+  
+  if [ -z "$SESSION_TOKEN" ] || [ -z "$IDENTITY_TOKEN" ]; then
+    echo -e "${RED}ERROR: Could not extract session tokens${NC}"
+    echo -e "${RED}Response: $SESSION_RESPONSE${NC}"
+    exit 1
+  fi
+  
+  # Export environment variables
+  export HYTALE_SERVER_SESSION_TOKEN="$SESSION_TOKEN"
+  export HYTALE_SERVER_IDENTITY_TOKEN="$IDENTITY_TOKEN"
+  
+  echo -e "${GREEN}Game session created successfully!${NC}"
+else
+  echo -e "${YELLOW}No credentials file found, skipping session creation${NC}"
+fi
+
+# ─────────────────────────────────────────────
 # Start server
 # ─────────────────────────────────────────────
 echo
