@@ -90,12 +90,10 @@ if [ ! -f Server/HytaleServer.jar ]; then
   echo -e "${YELLOW}Extracting server files from ${PATCH_ZIP}...${NC}"
   unzip -oq "$PATCH_ZIP" >/dev/null 2>&1
   
-  # Download default config template
-  if [ ! -f config.json ]; then
-    echo -e "${YELLOW}Downloading default config template...${NC}"
-    curl -sSL -o config.json https://p5w3.va.idrivee2-19.com/public-data-aleforge/configs/hytale/config.json >/dev/null 2>&1
-    echo -e "${GREEN}Config template downloaded${NC}"
-  fi
+  # Download default config template (overwrite if exists)
+  echo -e "${YELLOW}Downloading default config template...${NC}"
+  curl -sSL -o config.json https://p5w3.va.idrivee2-19.com/public-data-aleforge/configs/hytale/config.json >/dev/null 2>&1
+  echo -e "${GREEN}Config template downloaded${NC}"
   
   # Clean up patch ZIP after successful extraction
   if [ -n "$PATCH_ZIP" ] && [ -f "$PATCH_ZIP" ]; then
