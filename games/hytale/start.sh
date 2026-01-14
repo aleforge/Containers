@@ -106,6 +106,12 @@ if [ ! -f Assets.zip ]; then
   exit 1
 fi
 
+# Clean up patch ZIP after successful extraction
+if [ -n "$PATCH_ZIP" ] && [ -f "$PATCH_ZIP" ]; then
+  echo -e "${YELLOW}Cleaning up ${PATCH_ZIP}...${NC}"
+  rm -f "$PATCH_ZIP"
+fi
+
 # ─────────────────────────────────────────────
 # Authenticate and create game session tokens
 # ─────────────────────────────────────────────
