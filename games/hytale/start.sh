@@ -17,6 +17,7 @@ NC='\033[0m'
 # ─────────────────────────────────────────────
 SERVER_PORT="${SERVER_PORT:-5520}"
 AUTH_MODE="${AUTH_MODE:-authenticated}"
+AUTO_UPDATE="${AUTO_UPDATE:-1}"
 ENABLE_BACKUPS="${ENABLE_BACKUPS:-false}"
 BACKUP_DIR="${BACKUP_DIR:-backups}"
 BACKUP_FREQUENCY="${BACKUP_FREQUENCY:-60}"
@@ -47,25 +48,31 @@ echo -e "${BLUE}Hytale Downloader:${NC} $(./hytale-downloader -version 2>/dev/nu
 ./hytale-downloader -check-update >/dev/null 2>&1 || true
 
 # ─────────────────────────────────────────────
-# Download server if missing
+# Download/update server files
 # ─────────────────────────────────────────────
-if [ ! -f Server/HytaleServer.jar ]; then
-  if [ ! -f .hytale-downloader-credentials.json ]; then
-    echo -e "${YELLOW}Server not installed.${NC}"
-    echo -e "${GREEN}Authentication required to download server files.${NC}"
-    echo
-    echo -e "${BLUE}When prompted:${NC}"
-    echo " • Open the URL shown"
-    echo " • Enter the device code"
-    echo " • Complete login in your browser"
-    echo
-    echo -e "${RED}Do NOT restart the server during authentication.${NC}"
-    echo
-  else
-    echo -e "${YELLOW}Server files missing, re-downloading...${NC}"
-  fi
+if [ ! -f .hytale-downloader-credentials.json ]; then
+  echo -e "${YELLOW}Server not installed.${NC}"
+  echo -e "${GREEN}Authentication required to download server files.${NC}"
+  echo
+  echo -e "${BLUE}When prompted:${NC}"
+  echo " • Open the URL shown"
+  echo " • Enter the device code"
+  echo " • Complete login in your browser"
+  echo
+  echo -e "${RED}Do NOT restart the server during authentication.${NC}"
+  echo
+fi
 
+# Run downloader to check for and download updates (if enabled)
+if [ "${AUTO_UPDATE}" = "1" ]; then
   ./hytale-downloader --skip-update-check || true
+else
+  echo -e "${YELLOW}Auto-update disabled, skipping download check${NC}"
+  # Still run downloader if server files don't exist
+  if [ ! -f Server/HytaleServer.jar ]; then
+    echo -e "${YELLOW}Server files missing, downloading...${NC}"
+    ./hytale-downloader --skip-update-check || true
+  fi
 fi
 
 # ─────────────────────────────────────────────
@@ -298,7 +305,7 @@ echo
 
 exec java \
   -Xms128M \
-  -Xmx$((SERVER_MEMORY * 90 / 100))M \
+  -Xmx$((SERVER_MEMORY * 80 / 100))M \
   -jar Server/HytaleServer.jar \
   --assets Assets.zip \
   --auth-mode "${AUTH_MODE}" \
