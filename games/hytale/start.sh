@@ -92,7 +92,7 @@ if [ ! -f Server/HytaleServer.jar ]; then
   
   # Download default config template (overwrite if exists)
   echo -e "${YELLOW}Downloading default config template...${NC}"
-  curl -sSL -o config.json https://p5w3.va.idrivee2-19.com/public-data-aleforge/configs/hytale/config.json >/dev/null 2>&1
+  curl -sSL -o config.json https://f000.backblazeb2.com/file/AleForge-public-Data/configs/hytale/config.json >/dev/null 2>&1
   echo -e "${GREEN}Config template downloaded${NC}"
   
   # Clean up patch ZIP after successful extraction
