@@ -76,21 +76,34 @@ else
 fi
 
 # ─────────────────────────────────────────────
-# Find downloaded patch ZIP
-# ─────────────────────────────────────────────
-PATCH_ZIP="$(ls -1 *.zip 2>/dev/null | grep -v Assets.zip | head -n1 || true)"
-
-if [ -z "$PATCH_ZIP" ]; then
-  echo -e "${RED}ERROR: No patch ZIP found after download.${NC}"
-  exit 1
-fi
-
-# ─────────────────────────────────────────────
 # Extract patch ZIP if server not present
 # ─────────────────────────────────────────────
 if [ ! -f Server/HytaleServer.jar ]; then
+  # Find downloaded patch ZIP
+  PATCH_ZIP="$(ls -1 *.zip 2>/dev/null | grep -v Assets.zip | head -n1 || true)"
+
+  if [ -z "$PATCH_ZIP" ]; then
+    echo -e "${RED}ERROR: No patch ZIP found after download.${NC}"
+    exit 1
+  fi
+  
   echo -e "${YELLOW}Extracting server files from ${PATCH_ZIP}...${NC}"
   unzip -oq "$PATCH_ZIP" >/dev/null 2>&1
+  
+  # Download default config template
+  if [ ! -f config.json ]; then
+    echo -e "${YELLOW}Downloading default config template...${NC}"
+    curl -sSL -o config.json https://p5w3.va.idrivee2-19.com/public-data-aleforge/configs/hytale/config.json >/dev/null 2>&1
+    echo -e "${GREEN}Config template downloaded${NC}"
+  fi
+  
+  # Clean up patch ZIP after successful extraction
+  if [ -n "$PATCH_ZIP" ] && [ -f "$PATCH_ZIP" ]; then
+    echo -e "${YELLOW}Cleaning up ${PATCH_ZIP}...${NC}"
+    rm -f "$PATCH_ZIP"
+  fi
+else
+  echo -e "${GREEN}Server files already exist, skipping extraction${NC}"
 fi
 
 # ─────────────────────────────────────────────
@@ -104,12 +117,6 @@ fi
 if [ ! -f Assets.zip ]; then
   echo -e "${RED}ERROR: Assets.zip not found after extraction.${NC}"
   exit 1
-fi
-
-# Clean up patch ZIP after successful extraction
-if [ -n "$PATCH_ZIP" ] && [ -f "$PATCH_ZIP" ]; then
-  echo -e "${YELLOW}Cleaning up ${PATCH_ZIP}...${NC}"
-  rm -f "$PATCH_ZIP"
 fi
 
 # ─────────────────────────────────────────────
