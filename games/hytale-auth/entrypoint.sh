@@ -42,9 +42,19 @@ unset HYTALE_TOKEN HYTALE_PROFILE
 
 echo "Downloading essential mods..."
 
-mkdir -vp mods && curl -L -o mods/nitrado-performance-saver-1.0.0.jar https://github.com/nitrado/hytale-plugin-performance-saver/releases/download/v1.0.0/nitrado-performance-saver-1.0.0.jar\
-  && curl -L -o mods/nitrado-webserver-1.0.0.jar https://github.com/nitrado/hytale-plugin-webserver/releases/download/v1.0.0/nitrado-webserver-1.0.0.jar\
-  && curl -L -o mods/nitrado-query-1.0.1.jar https://github.com/nitrado/hytale-plugin-query/releases/download/v1.0.1/nitrado-query-1.0.1.jar
+mkdir -vp mods
+
+# Download latest nitrado-performance-saver
+PERF_SAVER_URL=$(curl -s https://api.github.com/repos/nitrado/hytale-plugin-performance-saver/releases/latest | jq -r '.assets[0].browser_download_url')
+curl -L -o "mods/$(basename "$PERF_SAVER_URL" | sed 's/nitrado-//')" "$PERF_SAVER_URL"
+
+# Download latest nitrado-webserver
+WEBSERVER_URL=$(curl -s https://api.github.com/repos/nitrado/hytale-plugin-webserver/releases/latest | jq -r '.assets[0].browser_download_url')
+curl -L -o "mods/$(basename "$WEBSERVER_URL" | sed 's/nitrado-//')" "$WEBSERVER_URL"
+
+# Download latest nitrado-query
+QUERY_URL=$(curl -s https://api.github.com/repos/nitrado/hytale-plugin-query/releases/latest | jq -r '.assets[0].browser_download_url')
+curl -L -o "mods/$(basename "$QUERY_URL" | sed 's/nitrado-//')" "$QUERY_URL"
 
 PERMISSIONS=$(cat permissions.json 2>/dev/null)
 if [[ "$PERMISSIONS" == "" ]]; then
