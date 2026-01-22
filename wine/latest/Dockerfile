@@ -29,10 +29,16 @@ RUN             apt install --install-recommends wine-stable-i386 -y && \
                 apt install --install-recommends winehq-stable -y && \
                 apt install --install-recommends cabextract wine-binfmt -y
 
+# Ensure wine64 is available in PATH
+RUN             ln -sf /opt/wine-stable/bin/wine64 /usr/local/bin/wine64 || \
+                ln -sf /usr/lib/wine/wine64 /usr/local/bin/wine64 || \
+                ln -sf /usr/bin/wine64 /usr/local/bin/wine64 || true
+
 # Set up Winetricks
 RUN	            wget -q -O /usr/sbin/winetricks https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks \
                 && chmod +x /usr/sbin/winetricks
 
+ENV             PATH="/opt/wine-stable/bin:${PATH}"
 ENV             HOME=/home/container
 ENV             WINEPREFIX=/home/container/.wine
 ENV             WINEDEBUG=-all
