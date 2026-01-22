@@ -1,7 +1,13 @@
 FROM --platform=$TARGETOS/$TARGETARCH eclipse-temurin:25-jdk
 
+LABEL author="AleForge" maintainer="info@aleforge.net"
+LABEL org.opencontainers.image.source="https://github.com/aleforge/containers"
+LABEL org.opencontainers.image.licenses=MIT
+
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN 		apt-get update -y \
-				&& apt-get install -y curl libarchive-tools jq \
+				&& apt-get install -y curl libarchive-tools jq tini \
 				&& useradd -d /home/container -m container
 
 RUN curl https://downloader.hytale.com/hytale-downloader.zip | bsdtar -xf- hytale-downloader-linux-amd64 \
@@ -21,6 +27,9 @@ USER        container
 ENV         USER=container HOME=/home/container
 WORKDIR     /home/container
 
-COPY        ./../entrypoint.sh /entrypoint.sh
+STOPSIGNAL SIGINT
 
-CMD         [ "/bin/bash", "/entrypoint.sh" ]
+COPY        --chown=container:container ./entrypoint.sh /entrypoint.sh
+RUN         chmod +x /entrypoint.sh
+ENTRYPOINT  ["/usr/bin/tini", "-g", "--"]
+CMD         ["/bin/bash", "/entrypoint.sh"]

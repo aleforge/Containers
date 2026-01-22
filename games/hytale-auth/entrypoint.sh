@@ -1,6 +1,33 @@
 #!/bin/bash
 
+clear
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+# Wait for the container to fully initialize
+sleep 1
+
+# Default the TZ environment variable to UTC.
+TZ=${TZ:-UTC}
+export TZ
+
+# Set environment variable that holds the Internal Docker IP
+INTERNAL_IP=$(ip route get 1 | awk '{print $(NF-2);exit}')
+export INTERNAL_IP
+
+# Information output
+echo -e "${BLUE}---------------------------------------------------------------------${NC}"
+echo -e "${YELLOW}Hytale Image from AleForge${NC}"
+echo -e "${RED}THIS IMAGE IS LICENSED UNDER MIT${NC}"
+echo -e "${BLUE}---------------------------------------------------------------------${NC}"
+echo -e "${YELLOW}Linux Distribution: ${RED}$(. /etc/os-release ; echo $PRETTY_NAME)${NC}"
+echo -e "${YELLOW}Current timezone: $(cat /etc/timezone)${NC}"
+echo -e "${YELLOW}Java Version:${NC}"
 java -version
+echo -e "${BLUE}---------------------------------------------------------------------${NC}"
 
 if [[ "$RUN_DOWNLOADER" == "1" ]]; then
   if [[ "$BRANCH" == "release" ]]; then
