@@ -18,6 +18,7 @@ NC='\033[0m'
 SERVER_PORT="${SERVER_PORT:-5520}"
 AUTH_MODE="${AUTH_MODE:-authenticated}"
 AUTO_UPDATE="${AUTO_UPDATE:-1}"
+BRANCH="${BRANCH:-release}"
 ENABLE_BACKUPS="${ENABLE_BACKUPS:-false}"
 BACKUP_DIR="${BACKUP_DIR:-backups}"
 BACKUP_FREQUENCY="${BACKUP_FREQUENCY:-60}"
@@ -65,13 +66,13 @@ fi
 
 # Run downloader to check for and download updates (if enabled)
 if [ "${AUTO_UPDATE}" = "1" ]; then
-  ./hytale-downloader --skip-update-check || true
+  ./hytale-downloader --skip-update-check --patchline "${BRANCH}" || true
 else
   echo -e "${YELLOW}Auto-update disabled, skipping download check${NC}"
   # Still run downloader if server files don't exist
   if [ ! -f Server/HytaleServer.jar ]; then
     echo -e "${YELLOW}Server files missing, downloading...${NC}"
-    ./hytale-downloader --skip-update-check || true
+    ./hytale-downloader --skip-update-check --patchline "${BRANCH}" || true
   fi
 fi
 
