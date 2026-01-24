@@ -77,12 +77,13 @@ else
 fi
 
 # ─────────────────────────────────────────────
-# Extract patch ZIP if server not present
+# Extract patch ZIP if downloaded or server not present
 # ─────────────────────────────────────────────
-if [ ! -f Server/HytaleServer.jar ]; then
-  # Find downloaded patch ZIP
-  PATCH_ZIP="$(ls -1 *.zip 2>/dev/null | grep -v Assets.zip | head -n1 || true)"
+# Find downloaded patch ZIP
+PATCH_ZIP="$(ls -1 *.zip 2>/dev/null | grep -v Assets.zip | head -n1 || true)"
 
+# Extract if we have a patch ZIP or if server files are missing
+if [ -n "$PATCH_ZIP" ] || [ ! -f Server/HytaleServer.jar ]; then
   if [ -z "$PATCH_ZIP" ]; then
     echo -e "${RED}ERROR: No patch ZIP found after download.${NC}"
     exit 1
@@ -91,10 +92,12 @@ if [ ! -f Server/HytaleServer.jar ]; then
   echo -e "${YELLOW}Extracting server files from ${PATCH_ZIP}...${NC}"
   unzip -oq "$PATCH_ZIP" >/dev/null 2>&1
   
-  # Download default config template (overwrite if exists)
-  echo -e "${YELLOW}Downloading default config template...${NC}"
-  curl -sSL -o config.json https://f000.backblazeb2.com/file/AleForge-public-Data/configs/hytale/config.json >/dev/null 2>&1
-  echo -e "${GREEN}Config template downloaded${NC}"
+  # Download default config template only on initial setup
+  if [ ! -f config.json ]; then
+    echo -e "${YELLOW}Downloading default config template...${NC}"
+    curl -sSL -o config.json https://f000.backblazeb2.com/file/AleForge-public-Data/configs/hytale/config.json >/dev/null 2>&1
+    echo -e "${GREEN}Config template downloaded${NC}"
+  fi
   
   # Clean up patch ZIP after successful extraction
   if [ -n "$PATCH_ZIP" ] && [ -f "$PATCH_ZIP" ]; then
@@ -102,7 +105,7 @@ if [ ! -f Server/HytaleServer.jar ]; then
     rm -f "$PATCH_ZIP"
   fi
 else
-  echo -e "${GREEN}Server files already exist, skipping extraction${NC}"
+  echo -e "${GREEN}Server files up to date, no extraction needed${NC}"
 fi
 
 # ─────────────────────────────────────────────
