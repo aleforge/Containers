@@ -1,160 +1,160 @@
 name: Hytale Auth Token Refresh
 
 on:
-    # Run every 30 minutes
-    schedule:
-        - cron: "*/30 * * * *"
+  # Run every 30 minutes
+  schedule:
+    - cron: "*/30 * * * *"
 
-    # Allow manual trigger with authentication inputs
-    workflow_dispatch:
-        inputs:
-            hytale_access_token:
-                description: "Hytale Access Token (for initial authentication)"
-                required: false
-                type: string
-            hytale_refresh_token:
-                description: "Hytale Refresh Token (optional)"
-                required: false
-                type: string
-            force_rebuild:
-                description: "Force rebuild hytale-auth container"
-                required: false
-                type: boolean
-                default: false
+  # Allow manual trigger with authentication inputs
+  workflow_dispatch:
+    inputs:
+      hytale_access_token:
+        description: "Hytale Access Token (for initial authentication)"
+        required: false
+        type: string
+      hytale_refresh_token:
+        description: "Hytale Refresh Token (optional)"
+        required: false
+        type: string
+      force_rebuild:
+        description: "Force rebuild hytale-auth container"
+        required: false
+        type: boolean
+        default: false
 
 jobs:
-    refresh-auth:
-        name: "Refresh Hytale Authentication"
-        runs-on: ubuntu-latest
-        permissions:
-            contents: read
-            packages: write
-        steps:
-            - uses: actions/checkout@v4
+  refresh-auth:
+    name: "Refresh Hytale Authentication"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
 
-            - name: Setup Authentication
-              id: setup_auth
-              run: |
-                  # Use manual input if provided, otherwise use stored secret
-                  if [ -n "${{ inputs.hytale_access_token }}" ]; then
-                    echo "Using manually provided access token"
-                    ACCESS_TOKEN="${{ inputs.hytale_access_token }}"
-                    REFRESH_TOKEN="${{ inputs.hytale_refresh_token }}"
-                  else
-                    echo "Using stored access token from secrets"
-                    ACCESS_TOKEN="${{ secrets.HYTALE_ACCESS_TOKEN }}"
-                    REFRESH_TOKEN="${{ secrets.HYTALE_REFRESH_TOKEN }}"
-                  fi
+      - name: Setup Authentication
+        id: setup_auth
+        run: |
+          # Use manual input if provided, otherwise use stored secret
+          if [ -n "${{ inputs.hytale_access_token }}" ]; then
+            echo "Using manually provided access token"
+            ACCESS_TOKEN="${{ inputs.hytale_access_token }}"
+            REFRESH_TOKEN="${{ inputs.hytale_refresh_token }}"
+          else
+            echo "Using stored access token from secrets"
+            ACCESS_TOKEN="${{ secrets.HYTALE_ACCESS_TOKEN }}"
+            REFRESH_TOKEN="${{ secrets.HYTALE_REFRESH_TOKEN }}"
+          fi
 
-                  echo "access_token=$ACCESS_TOKEN" >> $GITHUB_OUTPUT
-                  echo "refresh_token=$REFRESH_TOKEN" >> $GITHUB_OUTPUT
+          echo "access_token=$ACCESS_TOKEN" >> $GITHUB_OUTPUT
+          echo "refresh_token=$REFRESH_TOKEN" >> $GITHUB_OUTPUT
 
-            - name: Refresh Hytale Token
-              id: refresh_token
-              run: |
-                  # Create credentials file
-                  cat > /tmp/.hytale-downloader-credentials.json <<EOF
-                  {
-                    "access_token": "${{ steps.setup_auth.outputs.access_token }}",
-                    "refresh_token": "${{ steps.setup_auth.outputs.refresh_token }}",
-                    "expires_at": 2500000000,
-                    "branch": "release"
-                  }
-                  EOF
+      - name: Refresh Hytale Token
+        id: refresh_token
+        run: |
+          # Create credentials file
+          cat > /tmp/.hytale-downloader-credentials.json <<EOF
+          {
+            "access_token": "${{ steps.setup_auth.outputs.access_token }}",
+            "refresh_token": "${{ steps.setup_auth.outputs.refresh_token }}",
+            "expires_at": 2500000000,
+            "branch": "release"
+          }
+          EOF
 
-                  # Download hytale-downloader
-                  echo "Downloading hytale-downloader..."
-                  curl -L https://downloader.hytale.com/hytale-downloader.zip -o hytale-downloader.zip
-                  unzip -o hytale-downloader.zip hytale-downloader-linux-amd64
-                  chmod +x hytale-downloader-linux-amd64
+          # Download hytale-downloader
+          echo "Downloading hytale-downloader..."
+          curl -L https://downloader.hytale.com/hytale-downloader.zip -o hytale-downloader.zip
+          unzip -o hytale-downloader.zip hytale-downloader-linux-amd64
+          chmod +x hytale-downloader-linux-amd64
 
-                  # Test authentication by getting version
-                  echo "Testing authentication..."
-                  ./hytale-downloader-linux-amd64 --credentials-path /tmp/.hytale-downloader-credentials.json --print-version || {
-                    echo "Authentication failed! Please check your tokens."
-                    exit 1
-                  }
+          # Test authentication by getting version
+          echo "Testing authentication..."
+          ./hytale-downloader-linux-amd64 --credentials-path /tmp/.hytale-downloader-credentials.json --print-version || {
+            echo "Authentication failed! Please check your tokens."
+            exit 1
+          }
 
-                  # Read potentially refreshed credentials
-                  NEW_ACCESS_TOKEN=$(jq -r '.access_token' /tmp/.hytale-downloader-credentials.json)
-                  NEW_REFRESH_TOKEN=$(jq -r '.refresh_token' /tmp/.hytale-downloader-credentials.json)
+          # Read potentially refreshed credentials
+          NEW_ACCESS_TOKEN=$(jq -r '.access_token' /tmp/.hytale-downloader-credentials.json)
+          NEW_REFRESH_TOKEN=$(jq -r '.refresh_token' /tmp/.hytale-downloader-credentials.json)
 
-                  # Clean up
-                  rm /tmp/.hytale-downloader-credentials.json hytale-downloader.zip hytale-downloader-linux-amd64
+          # Clean up
+          rm /tmp/.hytale-downloader-credentials.json hytale-downloader.zip hytale-downloader-linux-amd64
 
-                  echo "new_access_token=$NEW_ACCESS_TOKEN" >> $GITHUB_OUTPUT
-                  echo "new_refresh_token=$NEW_REFRESH_TOKEN" >> $GITHUB_OUTPUT
-                  echo "✅ Authentication successful!"
+          echo "new_access_token=$NEW_ACCESS_TOKEN" >> $GITHUB_OUTPUT
+          echo "new_refresh_token=$NEW_REFRESH_TOKEN" >> $GITHUB_OUTPUT
+          echo "✅ Authentication successful!"
 
-            - name: Update GitHub Secrets
-              if: steps.refresh_token.outputs.new_access_token != ''
-              uses: actions/github-script@v7
-              with:
-                  github-token: ${{ secrets.PAT_TOKEN }}
-                  script: |
-                      const sodium = require('libsodium-wrappers');
-                      await sodium.ready;
+      - name: Update GitHub Secrets
+        if: steps.refresh_token.outputs.new_access_token != ''
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PAT_TOKEN }}
+          script: |
+            const sodium = require('libsodium-wrappers');
+            await sodium.ready;
 
-                      const owner = context.repo.owner;
-                      const repo = context.repo.repo;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
 
-                      // Get repository public key
-                      const { data: publicKey } = await github.rest.actions.getRepoPublicKey({
-                        owner,
-                        repo
-                      });
+            // Get repository public key
+            const { data: publicKey } = await github.rest.actions.getRepoPublicKey({
+              owner,
+              repo
+            });
 
-                      // Encrypt the new tokens
-                      const accessTokenBytes = Buffer.from('${{ steps.refresh_token.outputs.new_access_token }}');
-                      const refreshTokenBytes = Buffer.from('${{ steps.refresh_token.outputs.new_refresh_token }}');
-                      const publicKeyBytes = Buffer.from(publicKey.key, 'base64');
+            // Encrypt the new tokens
+            const accessTokenBytes = Buffer.from('${{ steps.refresh_token.outputs.new_access_token }}');
+            const refreshTokenBytes = Buffer.from('${{ steps.refresh_token.outputs.new_refresh_token }}');
+            const publicKeyBytes = Buffer.from(publicKey.key, 'base64');
 
-                      const encryptedAccessToken = Buffer.from(
-                        sodium.crypto_box_seal(accessTokenBytes, publicKeyBytes)
-                      ).toString('base64');
+            const encryptedAccessToken = Buffer.from(
+              sodium.crypto_box_seal(accessTokenBytes, publicKeyBytes)
+            ).toString('base64');
 
-                      const encryptedRefreshToken = Buffer.from(
-                        sodium.crypto_box_seal(refreshTokenBytes, publicKeyBytes)
-                      ).toString('base64');
+            const encryptedRefreshToken = Buffer.from(
+              sodium.crypto_box_seal(refreshTokenBytes, publicKeyBytes)
+            ).toString('base64');
 
-                      // Update HYTALE_ACCESS_TOKEN secret
-                      await github.rest.actions.createOrUpdateRepoSecret({
-                        owner,
-                        repo,
-                        secret_name: 'HYTALE_ACCESS_TOKEN',
-                        encrypted_value: encryptedAccessToken,
-                        key_id: publicKey.key_id
-                      });
+            // Update HYTALE_ACCESS_TOKEN secret
+            await github.rest.actions.createOrUpdateRepoSecret({
+              owner,
+              repo,
+              secret_name: 'HYTALE_ACCESS_TOKEN',
+              encrypted_value: encryptedAccessToken,
+              key_id: publicKey.key_id
+            });
 
-                      // Update HYTALE_REFRESH_TOKEN secret
-                      if ('${{ steps.refresh_token.outputs.new_refresh_token }}' !== '') {
-                        await github.rest.actions.createOrUpdateRepoSecret({
-                          owner,
-                          repo,
-                          secret_name: 'HYTALE_REFRESH_TOKEN',
-                          encrypted_value: encryptedRefreshToken,
-                          key_id: publicKey.key_id
-                        });
-                      }
+            // Update HYTALE_REFRESH_TOKEN secret
+            if ('${{ steps.refresh_token.outputs.new_refresh_token }}' !== '') {
+              await github.rest.actions.createOrUpdateRepoSecret({
+                owner,
+                repo,
+                secret_name: 'HYTALE_REFRESH_TOKEN',
+                encrypted_value: encryptedRefreshToken,
+                key_id: publicKey.key_id
+              });
+            }
 
-                      console.log('✅ GitHub secrets updated successfully!');
+            console.log('✅ GitHub secrets updated successfully!');
 
-            - name: Rebuild hytale-auth container
-              if: inputs.force_rebuild || (github.event_name == 'workflow_dispatch' && inputs.hytale_access_token != '')
-              uses: benc-uk/workflow-dispatch@v1
-              with:
-                  workflow: hytale-auth.yml
-                  token: ${{ secrets.PAT_TOKEN }}
-                  ref: main
+      - name: Rebuild hytale-auth container
+        if: inputs.force_rebuild || (github.event_name == 'workflow_dispatch' && inputs.hytale_access_token != '')
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: hytale-auth.yml
+          token: ${{ secrets.PAT_TOKEN }}
+          ref: main
 
-            - name: Summary
-              run: |
-                  echo "## 🎮 Hytale Authentication Refresh" >> $GITHUB_STEP_SUMMARY
-                  echo "" >> $GITHUB_STEP_SUMMARY
-                  echo "✅ Authentication tokens refreshed successfully" >> $GITHUB_STEP_SUMMARY
-                  echo "" >> $GITHUB_STEP_SUMMARY
-                  echo "**Next scheduled refresh:** 30 minutes from now" >> $GITHUB_STEP_SUMMARY
-                  echo "" >> $GITHUB_STEP_SUMMARY
-                  if [ "${{ inputs.force_rebuild }}" == "true" ] || [ -n "${{ inputs.hytale_access_token }}" ]; then
-                    echo "🔨 Container rebuild triggered" >> $GITHUB_STEP_SUMMARY
-                  fi
+      - name: Summary
+        run: |
+          echo "## 🎮 Hytale Authentication Refresh" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Authentication tokens refreshed successfully" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Next scheduled refresh:** 30 minutes from now" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ inputs.force_rebuild }}" == "true" ] || [ -n "${{ inputs.hytale_access_token }}" ]; then
+            echo "🔨 Container rebuild triggered" >> $GITHUB_STEP_SUMMARY
+          fi
