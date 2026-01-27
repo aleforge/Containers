@@ -88,56 +88,22 @@ jobs:
 
       - name: Update GitHub Secrets
         if: steps.refresh_token.outputs.new_access_token != ''
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.PAT_TOKEN }}
-          script: |
-            const sodium = require('libsodium-wrappers');
-            await sodium.ready;
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+          NEW_ACCESS_TOKEN: ${{ steps.refresh_token.outputs.new_access_token }}
+          NEW_REFRESH_TOKEN: ${{ steps.refresh_token.outputs.new_refresh_token }}
+        run: |
+          # Update HYTALE_ACCESS_TOKEN secret using GitHub CLI
+          echo "Updating HYTALE_ACCESS_TOKEN secret..."
+          echo "$NEW_ACCESS_TOKEN" | gh secret set HYTALE_ACCESS_TOKEN --repo ${{ github.repository }}
 
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
+          # Update HYTALE_REFRESH_TOKEN secret if it exists
+          if [ -n "$NEW_REFRESH_TOKEN" ]; then
+            echo "Updating HYTALE_REFRESH_TOKEN secret..."
+            echo "$NEW_REFRESH_TOKEN" | gh secret set HYTALE_REFRESH_TOKEN --repo ${{ github.repository }}
+          fi
 
-            // Get repository public key
-            const { data: publicKey } = await github.rest.actions.getRepoPublicKey({
-              owner,
-              repo
-            });
-
-            // Encrypt the new tokens
-            const accessTokenBytes = Buffer.from('${{ steps.refresh_token.outputs.new_access_token }}');
-            const refreshTokenBytes = Buffer.from('${{ steps.refresh_token.outputs.new_refresh_token }}');
-            const publicKeyBytes = Buffer.from(publicKey.key, 'base64');
-
-            const encryptedAccessToken = Buffer.from(
-              sodium.crypto_box_seal(accessTokenBytes, publicKeyBytes)
-            ).toString('base64');
-
-            const encryptedRefreshToken = Buffer.from(
-              sodium.crypto_box_seal(refreshTokenBytes, publicKeyBytes)
-            ).toString('base64');
-
-            // Update HYTALE_ACCESS_TOKEN secret
-            await github.rest.actions.createOrUpdateRepoSecret({
-              owner,
-              repo,
-              secret_name: 'HYTALE_ACCESS_TOKEN',
-              encrypted_value: encryptedAccessToken,
-              key_id: publicKey.key_id
-            });
-
-            // Update HYTALE_REFRESH_TOKEN secret
-            if ('${{ steps.refresh_token.outputs.new_refresh_token }}' !== '') {
-              await github.rest.actions.createOrUpdateRepoSecret({
-                owner,
-                repo,
-                secret_name: 'HYTALE_REFRESH_TOKEN',
-                encrypted_value: encryptedRefreshToken,
-                key_id: publicKey.key_id
-              });
-            }
-
-            console.log('✅ GitHub secrets updated successfully!');
+          echo "✅ GitHub secrets updated successfully!"
 
       - name: Rebuild hytale-auth container
         if: inputs.force_rebuild || (github.event_name == 'workflow_dispatch' && inputs.hytale_access_token != '')
