@@ -29,7 +29,6 @@ jobs:
         permissions:
             contents: read
             packages: write
-            secrets: write
         steps:
             - uses: actions/checkout@v4
 
