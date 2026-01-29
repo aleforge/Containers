@@ -72,14 +72,17 @@ echo "Downloading essential mods..."
 mkdir -vp mods
 
 # Download latest nitrado-performance-saver
+rm -f mods/performance-saver-*.jar
 PERF_SAVER_URL=$(curl -s https://api.github.com/repos/nitrado/hytale-plugin-performance-saver/releases/latest | jq -r '.assets[0].browser_download_url')
 curl -L -o "mods/$(basename "$PERF_SAVER_URL" | sed 's/nitrado-//')" "$PERF_SAVER_URL"
 
 # Download latest nitrado-webserver
+rm -f mods/webserver-*.jar
 WEBSERVER_URL=$(curl -s https://api.github.com/repos/nitrado/hytale-plugin-webserver/releases/latest | jq -r '.assets[0].browser_download_url')
 curl -L -o "mods/$(basename "$WEBSERVER_URL" | sed 's/nitrado-//')" "$WEBSERVER_URL"
 
 # Download latest nitrado-query
+rm -f mods/query-*.jar
 QUERY_URL=$(curl -s https://api.github.com/repos/nitrado/hytale-plugin-query/releases/latest | jq -r '.assets[0].browser_download_url')
 curl -L -o "mods/$(basename "$QUERY_URL" | sed 's/nitrado-//')" "$QUERY_URL"
 
