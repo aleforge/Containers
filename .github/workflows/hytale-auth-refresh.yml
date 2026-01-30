@@ -212,8 +212,67 @@ jobs:
 
           echo "✅ GitHub secrets updated successfully!"
 
+      - name: Check Hytale Version
+        id: check_version
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          echo "🔍 Checking current Hytale server version..."
+          
+          # Get current access token
+          if [ "${{ github.event_name }}" == "schedule" ] || [ "${{ inputs.mode }}" == "refresh" ]; then
+            ACCESS_TOKEN="${{ steps.refresh_token.outputs.new_access_token }}"
+          else
+            ACCESS_TOKEN="${{ steps.setup_auth.outputs.access_token }}"
+          fi
+          
+          # Download hytale-downloader
+          curl -sL https://downloader.hytale.com/hytale-downloader.zip -o hytale-downloader.zip
+          unzip -q -o hytale-downloader.zip hytale-downloader-linux-amd64
+          chmod +x hytale-downloader-linux-amd64
+          
+          # Create credentials file
+          cat > /tmp/.hytale-credentials.json <<EOF
+          {
+            "access_token": "$ACCESS_TOKEN",
+            "refresh_token": "",
+            "expires_at": 2500000000,
+            "branch": "release"
+          }
+          EOF
+          
+          # Get current version
+          CURRENT_VERSION=$(./hytale-downloader-linux-amd64 --credentials-path /tmp/.hytale-credentials.json --print-version 2>&1 || echo "unknown")
+          
+          # Cleanup
+          rm -f /tmp/.hytale-credentials.json hytale-downloader.zip hytale-downloader-linux-amd64
+          
+          echo "📦 Current Hytale version: $CURRENT_VERSION"
+          
+          # Get stored version from repository variables
+          STORED_VERSION=$(gh variable get HYTALE_CURRENT_VERSION --repo ${{ github.repository }} 2>/dev/null || echo "")
+          
+          if [ -z "$STORED_VERSION" ]; then
+            echo "📝 No stored version found, initializing..."
+            gh variable set HYTALE_CURRENT_VERSION --body "$CURRENT_VERSION" --repo ${{ github.repository }}
+            echo "version_changed=true" >> $GITHUB_OUTPUT
+            echo "new_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+            echo "old_version=none" >> $GITHUB_OUTPUT
+          elif [ "$STORED_VERSION" != "$CURRENT_VERSION" ]; then
+            echo "🆕 Version changed: $STORED_VERSION → $CURRENT_VERSION"
+            gh variable set HYTALE_CURRENT_VERSION --body "$CURRENT_VERSION" --repo ${{ github.repository }}
+            echo "version_changed=true" >> $GITHUB_OUTPUT
+            echo "new_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+            echo "old_version=$STORED_VERSION" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Version unchanged: $CURRENT_VERSION"
+            echo "version_changed=false" >> $GITHUB_OUTPUT
+            echo "new_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+            echo "old_version=$STORED_VERSION" >> $GITHUB_OUTPUT
+          fi
+
       - name: Rebuild hytale-auth container
-        if: inputs.force_rebuild || (github.event_name == 'workflow_dispatch' && inputs.hytale_access_token != '')
+        if: inputs.force_rebuild || steps.check_version.outputs.version_changed == 'true' || (github.event_name == 'workflow_dispatch' && inputs.hytale_access_token != '')
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: hytale-auth.yml
@@ -241,6 +300,25 @@ jobs:
           
           echo "" >> $GITHUB_STEP_SUMMARY
           
+          # Version check info
+          if [ -n "${{ steps.check_version.outputs.new_version }}" ]; then
+            echo "### 📦 Hytale Version Check" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Current version:** \`${{ steps.check_version.outputs.new_version }}\`" >> $GITHUB_STEP_SUMMARY
+            
+            if [ "${{ steps.check_version.outputs.version_changed }}" == "true" ]; then
+              if [ "${{ steps.check_version.outputs.old_version }}" != "none" ]; then
+                echo "**Previous version:** \`${{ steps.check_version.outputs.old_version }}\`" >> $GITHUB_STEP_SUMMARY
+              fi
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "🆕 **New version detected! Container rebuild triggered.**" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "✅ No version change" >> $GITHUB_STEP_SUMMARY
+            fi
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+          
           if [ "${{ inputs.force_rebuild }}" == "true" ]; then
-            echo "🔨 Container rebuild triggered" >> $GITHUB_STEP_SUMMARY
+            echo "🔨 Container rebuild triggered (forced)" >> $GITHUB_STEP_SUMMARY
           fi

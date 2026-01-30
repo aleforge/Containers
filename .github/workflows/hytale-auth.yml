@@ -8,6 +8,8 @@ on:
             - games/hytale-auth/**
     workflow_dispatch:
     workflow_call:
+    schedule:
+        - cron: "0 0 * * *"
 
 jobs:
     build:
