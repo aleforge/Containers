@@ -1,7 +1,11 @@
 name: Hytale Auth Token Refresh
 
 on:
-  # Manual trigger only
+  # Run every 30 minutes
+  schedule:
+    - cron: "*/30 * * * *"
+  
+  # Manual trigger
   workflow_dispatch:
     inputs:
       mode:
@@ -37,7 +41,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Device Code Flow - Request Code
-        if: inputs.mode == 'device_code'
+        if: inputs.mode == 'device_code' && github.event_name == 'workflow_dispatch'
         id: device_code
         run: |
           echo "🔐 Starting Device Code Flow for initial authentication..."
@@ -75,7 +79,7 @@ jobs:
           echo "⏱️  Expires in: $EXPIRES_IN seconds"
 
       - name: Device Code Flow - Wait for Authorization
-        if: inputs.mode == 'device_code'
+        if: inputs.mode == 'device_code' && github.event_name == 'workflow_dispatch'
         id: device_auth
         run: |
           echo "⏳ Waiting for user authorization..."
@@ -130,7 +134,12 @@ jobs:
         id: setup_auth
         run: |
           # Priority: device_code > manual input > stored secrets
-          if [ "${{ inputs.mode }}" == "device_code" ]; then
+          # Scheduled runs always use stored secrets
+          if [ "${{ github.event_name }}" == "schedule" ]; then
+            echo "Using stored tokens from secrets (scheduled run)"
+            ACCESS_TOKEN="${{ secrets.HYTALE_ACCESS_TOKEN }}"
+            REFRESH_TOKEN="${{ secrets.HYTALE_REFRESH_TOKEN }}"
+          elif [ "${{ inputs.mode }}" == "device_code" ]; then
             echo "Using tokens from device code flow"
             ACCESS_TOKEN="${{ steps.device_auth.outputs.device_access_token }}"
             REFRESH_TOKEN="${{ steps.device_auth.outputs.device_refresh_token }}"
@@ -148,7 +157,7 @@ jobs:
           echo "refresh_token=$REFRESH_TOKEN" >> $GITHUB_OUTPUT
 
       - name: Refresh OAuth2 Access Token
-        if: inputs.mode == 'refresh'
+        if: github.event_name == 'schedule' || inputs.mode == 'refresh'
         id: refresh_token
         run: |
           echo "🔄 Refreshing OAuth2 access token using refresh_token grant..."
