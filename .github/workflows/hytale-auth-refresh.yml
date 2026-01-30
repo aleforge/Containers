@@ -194,7 +194,7 @@ jobs:
           echo "✅ Access token refreshed successfully! (expires in ${EXPIRES_IN}s)"
 
       - name: Update GitHub Secrets
-        if: (inputs.mode == 'refresh' && steps.refresh_token.outputs.new_access_token != '') || inputs.mode == 'device_code'
+        if: (github.event_name == 'schedule' || inputs.mode == 'refresh') && steps.refresh_token.outputs.new_access_token != '' || inputs.mode == 'device_code'
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
           NEW_ACCESS_TOKEN: ${{ inputs.mode == 'device_code' && steps.setup_auth.outputs.access_token || steps.refresh_token.outputs.new_access_token }}
@@ -225,17 +225,20 @@ jobs:
           echo "## 🎮 Hytale Authentication" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
-          if [ "${{ inputs.mode }}" == "device_code" ]; then
+          if [ "${{ github.event_name }}" == "schedule" ]; then
+            echo "✅ OAuth2 tokens refreshed automatically (scheduled run)" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Next refresh:** 30 minutes from now" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ inputs.mode }}" == "device_code" ]; then
             echo "✅ Initial authorization completed via Device Code Flow" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "📝 Tokens have been stored in GitHub Secrets" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Automatic refresh:** Every 30 minutes" >> $GITHUB_STEP_SUMMARY
           else
             echo "✅ OAuth2 tokens refreshed successfully using refresh_token grant" >> $GITHUB_STEP_SUMMARY
           fi
           
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Mode:** ${{ inputs.mode }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Trigger:** Manual only" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
           if [ "${{ inputs.force_rebuild }}" == "true" ]; then
