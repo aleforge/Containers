@@ -23,6 +23,9 @@ RUN hytale-downloader --download-path /hytale-release.zip --credentials-path /tm
 
 RUN rm /tmp/.hytale-downloader-credentials.json
 
+# Fail build if credentials file still exists
+RUN test ! -f /tmp/.hytale-downloader-credentials.json || (echo "ERROR: Credentials file was not removed!" && exit 1)
+
 USER        container
 ENV         USER=container HOME=/home/container
 WORKDIR     /home/container
