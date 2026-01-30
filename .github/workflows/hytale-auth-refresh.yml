@@ -49,42 +49,41 @@ jobs:
           echo "access_token=$ACCESS_TOKEN" >> $GITHUB_OUTPUT
           echo "refresh_token=$REFRESH_TOKEN" >> $GITHUB_OUTPUT
 
-      - name: Refresh Hytale Token
+      - name: Refresh OAuth2 Access Token
         id: refresh_token
         run: |
-          # Create credentials file
-          cat > /tmp/.hytale-downloader-credentials.json <<EOF
-          {
-            "access_token": "${{ steps.setup_auth.outputs.access_token }}",
-            "refresh_token": "${{ steps.setup_auth.outputs.refresh_token }}",
-            "expires_at": 2500000000,
-            "branch": "release"
-          }
-          EOF
+          echo "🔄 Refreshing OAuth2 access token using refresh_token grant..."
 
-          # Download hytale-downloader
-          echo "Downloading hytale-downloader..."
-          curl -L https://downloader.hytale.com/hytale-downloader.zip -o hytale-downloader.zip
-          unzip -o hytale-downloader.zip hytale-downloader-linux-amd64
-          chmod +x hytale-downloader-linux-amd64
+          # Use OAuth2 refresh token flow per Hytale documentation
+          # https://support.hytale.com/hc/en-us/articles/45328341414043-Server-Provider-Authentication-Guide
+          RESPONSE=$(curl -s -X POST "https://oauth.accounts.hytale.com/oauth2/token" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -d "client_id=hytale-server" \
+            -d "grant_type=refresh_token" \
+            -d "refresh_token=${{ steps.setup_auth.outputs.refresh_token }}")
 
-          # Test authentication by getting version
-          echo "Testing authentication..."
-          ./hytale-downloader-linux-amd64 --credentials-path /tmp/.hytale-downloader-credentials.json --print-version || {
-            echo "Authentication failed! Please check your tokens."
+          # Check if refresh was successful
+          if echo "$RESPONSE" | jq -e '.error' >/dev/null 2>&1; then
+            ERROR=$(echo "$RESPONSE" | jq -r '.error')
+            ERROR_DESC=$(echo "$RESPONSE" | jq -r '.error_description // "No description provided"')
+            echo "❌ Token refresh failed: $ERROR - $ERROR_DESC"
             exit 1
-          }
+          fi
 
-          # Read potentially refreshed credentials
-          NEW_ACCESS_TOKEN=$(jq -r '.access_token' /tmp/.hytale-downloader-credentials.json)
-          NEW_REFRESH_TOKEN=$(jq -r '.refresh_token' /tmp/.hytale-downloader-credentials.json)
+          # Extract new tokens
+          NEW_ACCESS_TOKEN=$(echo "$RESPONSE" | jq -r '.access_token')
+          NEW_REFRESH_TOKEN=$(echo "$RESPONSE" | jq -r '.refresh_token // ""')
+          EXPIRES_IN=$(echo "$RESPONSE" | jq -r '.expires_in')
 
-          # Clean up
-          rm /tmp/.hytale-downloader-credentials.json hytale-downloader.zip hytale-downloader-linux-amd64
+          # Use existing refresh token if new one wasn't provided
+          if [ -z "$NEW_REFRESH_TOKEN" ] || [ "$NEW_REFRESH_TOKEN" == "null" ]; then
+            NEW_REFRESH_TOKEN="${{ steps.setup_auth.outputs.refresh_token }}"
+            echo "ℹ️  Keeping existing refresh token (new one not provided)"
+          fi
 
           echo "new_access_token=$NEW_ACCESS_TOKEN" >> $GITHUB_OUTPUT
           echo "new_refresh_token=$NEW_REFRESH_TOKEN" >> $GITHUB_OUTPUT
-          echo "✅ Authentication successful!"
+          echo "✅ Access token refreshed successfully! (expires in ${EXPIRES_IN}s)"
 
       - name: Update GitHub Secrets
         if: steps.refresh_token.outputs.new_access_token != ''
@@ -117,7 +116,7 @@ jobs:
         run: |
           echo "## 🎮 Hytale Authentication Refresh" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✅ Authentication tokens refreshed successfully" >> $GITHUB_STEP_SUMMARY
+          echo "✅ OAuth2 tokens refreshed successfully using refresh_token grant" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Next scheduled refresh:** 30 minutes from now" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
