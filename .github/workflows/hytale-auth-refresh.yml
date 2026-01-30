@@ -1,26 +1,30 @@
 name: Hytale Auth Token Refresh
 
 on:
-  # Run every 30 minutes
-  schedule:
-    - cron: "*/30 * * * *"
-
-  # Allow manual trigger with authentication inputs
+  # Manual trigger only
   workflow_dispatch:
     inputs:
+      mode:
+        description: "Mode: 'device_code' for initial auth, 'refresh' to refresh existing tokens"
+        required: true
+        type: choice
+        options:
+          - refresh
+          - device_code
+        default: refresh
       hytale_access_token:
-        description: "Hytale Access Token (for initial authentication)"
+        description: "Hytale Access Token (for manual token input)"
         required: false
         type: string
       hytale_refresh_token:
-        description: "Hytale Refresh Token (optional)"
+        description: "Hytale Refresh Token (for manual token input)"
         required: false
         type: string
       force_rebuild:
         description: "Force rebuild hytale-auth container"
         required: false
         type: boolean
-        default: false
+        default: true
 
 jobs:
   refresh-auth:
@@ -32,16 +36,110 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Device Code Flow - Request Code
+        if: inputs.mode == 'device_code'
+        id: device_code
+        run: |
+          echo "🔐 Starting Device Code Flow for initial authentication..."
+          
+          # Step 1: Request device code
+          RESPONSE=$(curl -s -X POST "https://oauth.accounts.hytale.com/oauth2/device/auth" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -d "client_id=hytale-server" \
+            -d "scope=openid offline auth:server")
+          
+          DEVICE_CODE=$(echo "$RESPONSE" | jq -r '.device_code')
+          USER_CODE=$(echo "$RESPONSE" | jq -r '.user_code')
+          VERIFICATION_URI=$(echo "$RESPONSE" | jq -r '.verification_uri_complete')
+          EXPIRES_IN=$(echo "$RESPONSE" | jq -r '.expires_in')
+          INTERVAL=$(echo "$RESPONSE" | jq -r '.interval')
+          
+          echo "device_code=$DEVICE_CODE" >> $GITHUB_OUTPUT
+          echo "interval=$INTERVAL" >> $GITHUB_OUTPUT
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## 🔐 Device Authorization Required" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Please visit the following URL to authorize:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### $VERIFICATION_URI" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**User Code:** \`$USER_CODE\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "This code expires in $EXPIRES_IN seconds ($(($EXPIRES_IN / 60)) minutes)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          
+          echo "⏳ Please authorize at: $VERIFICATION_URI"
+          echo "📋 User Code: $USER_CODE"
+          echo "⏱️  Expires in: $EXPIRES_IN seconds"
+
+      - name: Device Code Flow - Wait for Authorization
+        if: inputs.mode == 'device_code'
+        id: device_auth
+        run: |
+          echo "⏳ Waiting for user authorization..."
+          
+          DEVICE_CODE="${{ steps.device_code.outputs.device_code }}"
+          INTERVAL=${{ steps.device_code.outputs.interval }}
+          MAX_ATTEMPTS=180  # 15 minutes max (180 * 5 seconds)
+          ATTEMPT=0
+          
+          while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+            ATTEMPT=$((ATTEMPT + 1))
+            sleep $INTERVAL
+            
+            RESPONSE=$(curl -s -X POST "https://oauth.accounts.hytale.com/oauth2/token" \
+              -H "Content-Type: application/x-www-form-urlencoded" \
+              -d "client_id=hytale-server" \
+              -d "grant_type=urn:ietf:params:oauth:grant-type:device_code" \
+              -d "device_code=$DEVICE_CODE")
+            
+            # Check for errors
+            ERROR=$(echo "$RESPONSE" | jq -r '.error // ""')
+            
+            if [ "$ERROR" == "authorization_pending" ]; then
+              echo "⏳ Still waiting... (attempt $ATTEMPT/$MAX_ATTEMPTS)"
+              continue
+            elif [ "$ERROR" == "slow_down" ]; then
+              echo "⚠️  Slowing down polling rate"
+              INTERVAL=$((INTERVAL + 5))
+              continue
+            elif [ -n "$ERROR" ] && [ "$ERROR" != "null" ]; then
+              echo "❌ Authorization failed: $ERROR"
+              echo "$RESPONSE" | jq '.'
+              exit 1
+            fi
+            
+            # Success! Extract tokens
+            ACCESS_TOKEN=$(echo "$RESPONSE" | jq -r '.access_token')
+            REFRESH_TOKEN=$(echo "$RESPONSE" | jq -r '.refresh_token')
+            
+            if [ -n "$ACCESS_TOKEN" ] && [ "$ACCESS_TOKEN" != "null" ]; then
+              echo "device_access_token=$ACCESS_TOKEN" >> $GITHUB_OUTPUT
+              echo "device_refresh_token=$REFRESH_TOKEN" >> $GITHUB_OUTPUT
+              echo "✅ Authorization successful!"
+              exit 0
+            fi
+          done
+          
+          echo "❌ Authorization timeout - user did not complete authorization in time"
+          exit 1
+
       - name: Setup Authentication
         id: setup_auth
         run: |
-          # Use manual input if provided, otherwise use stored secret
-          if [ -n "${{ inputs.hytale_access_token }}" ]; then
-            echo "Using manually provided access token"
+          # Priority: device_code > manual input > stored secrets
+          if [ "${{ inputs.mode }}" == "device_code" ]; then
+            echo "Using tokens from device code flow"
+            ACCESS_TOKEN="${{ steps.device_auth.outputs.device_access_token }}"
+            REFRESH_TOKEN="${{ steps.device_auth.outputs.device_refresh_token }}"
+          elif [ -n "${{ inputs.hytale_access_token }}" ]; then
+            echo "Using manually provided tokens"
             ACCESS_TOKEN="${{ inputs.hytale_access_token }}"
             REFRESH_TOKEN="${{ inputs.hytale_refresh_token }}"
           else
-            echo "Using stored access token from secrets"
+            echo "Using stored tokens from secrets"
             ACCESS_TOKEN="${{ secrets.HYTALE_ACCESS_TOKEN }}"
             REFRESH_TOKEN="${{ secrets.HYTALE_REFRESH_TOKEN }}"
           fi
@@ -50,6 +148,7 @@ jobs:
           echo "refresh_token=$REFRESH_TOKEN" >> $GITHUB_OUTPUT
 
       - name: Refresh OAuth2 Access Token
+        if: inputs.mode == 'refresh'
         id: refresh_token
         run: |
           echo "🔄 Refreshing OAuth2 access token using refresh_token grant..."
@@ -86,11 +185,11 @@ jobs:
           echo "✅ Access token refreshed successfully! (expires in ${EXPIRES_IN}s)"
 
       - name: Update GitHub Secrets
-        if: steps.refresh_token.outputs.new_access_token != ''
+        if: (inputs.mode == 'refresh' && steps.refresh_token.outputs.new_access_token != '') || inputs.mode == 'device_code'
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
-          NEW_ACCESS_TOKEN: ${{ steps.refresh_token.outputs.new_access_token }}
-          NEW_REFRESH_TOKEN: ${{ steps.refresh_token.outputs.new_refresh_token }}
+          NEW_ACCESS_TOKEN: ${{ inputs.mode == 'device_code' && steps.setup_auth.outputs.access_token || steps.refresh_token.outputs.new_access_token }}
+          NEW_REFRESH_TOKEN: ${{ inputs.mode == 'device_code' && steps.setup_auth.outputs.refresh_token || steps.refresh_token.outputs.new_refresh_token }}
         run: |
           # Update HYTALE_ACCESS_TOKEN secret using GitHub CLI
           echo "Updating HYTALE_ACCESS_TOKEN secret..."
@@ -114,12 +213,22 @@ jobs:
 
       - name: Summary
         run: |
-          echo "## 🎮 Hytale Authentication Refresh" >> $GITHUB_STEP_SUMMARY
+          echo "## 🎮 Hytale Authentication" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✅ OAuth2 tokens refreshed successfully using refresh_token grant" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ inputs.mode }}" == "device_code" ]; then
+            echo "✅ Initial authorization completed via Device Code Flow" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "📝 Tokens have been stored in GitHub Secrets" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ OAuth2 tokens refreshed successfully using refresh_token grant" >> $GITHUB_STEP_SUMMARY
+          fi
+          
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Next scheduled refresh:** 30 minutes from now" >> $GITHUB_STEP_SUMMARY
+          echo "**Mode:** ${{ inputs.mode }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Trigger:** Manual only" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ inputs.force_rebuild }}" == "true" ] || [ -n "${{ inputs.hytale_access_token }}" ]; then
+          
+          if [ "${{ inputs.force_rebuild }}" == "true" ]; then
             echo "🔨 Container rebuild triggered" >> $GITHUB_STEP_SUMMARY
           fi
