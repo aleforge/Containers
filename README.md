@@ -30,6 +30,8 @@ because these images are tuned to work with our platform and may not function ou
   - `ghcr.io/aleforge/dotnet:7`
 - [`dotnet8.0`](/dotnet/8)
   - `ghcr.io/aleforge/dotnet:8`
+- [`dotnet10.0`](/dotnet/10)
+  - `ghcr.io/aleforge/dotnet:10`
 
 ### [Games](/games)
 
