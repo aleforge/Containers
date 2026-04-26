@@ -12,7 +12,7 @@ RUN   useradd -m -d /home/container -s /bin/bash container
 
 
 RUN dpkg --add-architecture i386 \
-    && apt-update \
+    && apt update \
     && apt upgrade -y \
     && apt install -y \
         libcurl4-gnutls-dev:i386 \
