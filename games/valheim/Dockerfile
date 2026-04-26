@@ -33,6 +33,7 @@ RUN dpkg --add-architecture i386 \
         libc6 \
         curl \
         tar \
+        tini \
         iproute2 \
         net-tools \
         libatomic1 \
