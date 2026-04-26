@@ -1,4 +1,4 @@
-FROM  --platform=$TARGETOS/$TARGETARCH ubuntu:22.04
+FROM  --platform=$TARGETOS/$TARGETARCH ubuntu:24.04
 
 LABEL author="AleForge Support" maintainer="support@mail.aleforge.net"
 LABEL org.opencontainers.image.source="https://github.com/aleforge/containers/"
@@ -15,8 +15,8 @@ RUN         dpkg --add-architecture i386 \
             && apt update \
             && apt upgrade -y \
 			&& apt install -y libcurl4-gnutls-dev:i386 libssl3:i386 libcurl4:i386 lib32tinfo6 libtinfo6:i386 lib32z1 lib32stdc++6 libncurses5:i386 libcurl3-gnutls:i386 libsdl2-2.0-0:i386 \
- 				gcc g++ libgcc1 libc++-dev gdb libc6 curl tar iproute2 net-tools libatomic1 libsdl1.2debian libsdl2-2.0-0 \
-        		libfontconfig locales libcurl3-gnutls libpulse-dev libpulse0 libnss-wrapper gettext tini lsb-release
+ 				gcc g++ libgcc1 libc++-dev gdb libc6 curl tar iproute2 net-tools libatomic1 libsdl1.2debian libsdl2-2.0-0 tzdata \
+        		libfontconfig locales libcurl3-gnutls libpulse-dev libpulse0 libnss-wrapper gettext
 
 ## configure locale
 RUN   update-locale lang=en_US.UTF-8 \
