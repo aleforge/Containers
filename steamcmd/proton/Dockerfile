@@ -121,14 +121,6 @@ RUN  rm -f /var/lib/dbus/machine-id
 RUN  dbus-uuidgen --ensure
 
 # -----------------------------
-# Pipx PATH setup (pipx installed via apt above)
-# -----------------------------
-RUN python3 -m pipx ensurepath || true
-
-# Setup Protontricks
-RUN  pipx install protontricks
-
-# -----------------------------
 # Winetricks installation (global)
 # -----------------------------
 RUN wget -q -O /usr/sbin/winetricks https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks && \
