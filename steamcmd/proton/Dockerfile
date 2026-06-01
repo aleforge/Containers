@@ -1,12 +1,12 @@
 # ---------------------------------------------
 # Steam Proton image
 # ---------------------------------------------
-FROM  ubuntu:24.04
+FROM debian:trixie-slim
 
 LABEL author="AleForge Support" maintainer="support@mail.aleforge.net"
 LABEL org.opencontainers.image.source="https://github.com/aleforge/containers/"
 LABEL org.opencontainers.image.description="A Docker image to run Proton and Steamcmd on AleForge Panel (https://panel.aleforge.net)" 
-
+LABEL org.opencontainers.image.licenses=AGPL-3.0-or-later
 
 SHELL ["/bin/bash", "-c"]
 ARG DEBIAN_FRONTEND=noninteractive
@@ -14,72 +14,65 @@ ARG DEBIAN_FRONTEND=noninteractive
 # -----------------------------
 # System preparation
 # -----------------------------
-RUN dpkg --add-architecture i386 \
-    && apt update && apt -y upgrade \
-    && apt install -y --no-install-recommends \
-        nala \
-        ca-certificates \
-        curl \
-        file \
-        git \
-        gnupg \
-        gnupg2 \
-        gnutls-bin \
-        iproute2 \
-        locales \
-        net-tools \
-        netcat-openbsd \
-        openssl \
-        pulseaudio \
-        wget \
-        xauth \
-        xvfb \
-        tar \
-        tini \
-        virt-what \
-        yad \
-        alsa-tools \
-        ffmpeg \
-        mesa-utils \
-        libao-common \
-        libpulse-dev \
-        libpulse0 \
-        python3 \
-        python3-pip \
-        python3-setuptools \
-        python3-venv \
-        pipx \
-        cabextract \
-        winbind \
-        libsdl1.2debian \
-        libsdl1.2debian:i386 \
-        libsdl2-2.0-0 \
-        libsdl2-2.0-0:i386 \
-        libfreetype6 \
-        libfreetype6:i386 \
-        lib32gcc-s1 \
-        libgdiplus \
-        libncurses5-dev:i386 \
-        libncurses6 \
-        libssl3 \
-        libssl3:i386 \
-        libntlm0 \
-        libnss-wrapper \
-        libnss3 \
-        libgstreamer1.0-dev \
-        libgstreamer-plugins-base1.0-dev \
-        libgstreamer-plugins-bad1.0-dev \
-        gstreamer1.0-plugins-base \
-        gstreamer1.0-plugins-good \
-        gstreamer1.0-plugins-bad \
-        gstreamer1.0-plugins-ugly \
-        gstreamer1.0-libav \
-        gstreamer1.0-tools \
-        gstreamer1.0-x \
-        gstreamer1.0-alsa \
-        gstreamer1.0-gl \
-        gstreamer1.0-pulseaudio \
-    && apt clean && rm -rf /var/lib/apt/lists/*
+RUN dpkg --add-architecture i386 && \
+    apt-get update && apt-get -y upgrade && \
+    apt-get install -y --no-install-recommends \
+    nala \
+    alsa-tools \
+    ca-certificates \
+    cabextract \
+    curl \
+    dbus \
+    ffmpeg \
+    file \
+    git \
+    iproute2 \
+    jq \
+    locales \
+    numactl \
+    mesa-utils \
+    net-tools \
+    netcat-openbsd \
+    openssl \
+    pulseaudio \
+    python3-full \
+    python3-venv \
+    steam-devices \
+    tar \
+    tini \
+    wget \
+    winbind \
+    xvfb \
+    lib32gcc-s1 \
+    libao-common \
+    libasound2 \
+    libfreetype6 \
+    libfreetype6:i386 \
+    libsdl1.2debian \
+    libsdl1.2debian:i386 \
+    libsdl2-2.0-0 \
+    libsdl2-2.0-0:i386 \
+    libssl3 \
+    libssl3:i386 \
+    libgdiplus \
+    libncurses6 \
+    libntlm0 \
+    libnss-wrapper \
+    libnss3 \
+    libpulse-dev \
+    libpulse0 \
+    gstreamer1.0-plugins-base \
+    gstreamer1.0-plugins-good \
+    gstreamer1.0-plugins-bad \
+    gstreamer1.0-plugins-ugly \
+    gstreamer1.0-libav \
+    gstreamer1.0-x \
+    gstreamer1.0-alsa \
+    gstreamer1.0-gl \
+    gstreamer1.0-pulseaudio \
+    mesa-vulkan-drivers \
+    mesa-vulkan-drivers:i386 && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/*
 
 # -----------------------------
 # Set locale
@@ -92,22 +85,40 @@ ENV LC_ALL=en_US.UTF-8
 # -----------------------------
 # Proton-GE installation (global)
 # -----------------------------
-USER root
-RUN mkdir -p /opt/ProtonGE /usr/local/bin && cd /tmp \
-    && PROTON_URL=$(curl -s https://api.github.com/repos/GloriousEggroll/proton-ge-custom/releases/latest \
-        | grep browser_download_url | cut -d\" -f4 | grep '\.tar\.gz$') \
-    && curl -sLOJ "$PROTON_URL" \
-    && tar -xzf GE-Proton*.tar.gz -C /opt/ProtonGE --strip-components=1 \
-    && rm GE-Proton*.* \
-    && ln -sf /opt/ProtonGE/proton /usr/local/bin/proton-ge \
-    && ln -sf /opt/ProtonGE/proton /usr/local/bin/proton
-
+RUN set -eux; cd /tmp; \
+    # Fetch release JSON using curl (already installed in layer 1)
+    PROTON_JSON=$(curl -sSf https://api.github.com/repos/GloriousEggroll/proton-ge-custom/releases/latest 2>&1) || { echo "Failed to fetch Proton-GE releases" >&2; exit 1; }; \
+    # Extract .tar.gz URL using jq (installed in layer 1)
+    PROTON_URL=$(printf '%s' "$PROTON_JSON" | jq -r '.assets[].browser_download_url' 2>/dev/null | grep '\.tar\.gz$' | head -n1) || { echo "Failed to parse Proton-GE release JSON" >&2; exit 1; }; \
+    [ -n "$PROTON_URL" ] || { echo "No Proton-GE .tar.gz found in latest release" >&2; exit 1; }; \
+    # Extract checksum URL
+    PROTON_CHECKSUM_URL=$(printf '%s' "$PROTON_JSON" | jq -r '.assets[].browser_download_url' 2>/dev/null | grep '\.sha512sum$' | head -n1) || true; \
+    # Download Proton-GE tarball
+    curl -sSL "$PROTON_URL" -o proton-ge.tar.gz || { echo "Failed to download Proton-GE from $PROTON_URL" >&2; exit 1; }; \
+    [ -s proton-ge.tar.gz ] || { echo "Downloaded Proton-GE archive is empty" >&2; exit 1; }; \
+    # Validate checksum if available
+    if [ -n "$PROTON_CHECKSUM_URL" ]; then \
+        curl -sSL "$PROTON_CHECKSUM_URL" -o proton-ge.sha512sum && \
+        EXPECTED_HASH=$(awk '{print $1}' proton-ge.sha512sum | head -n1) && \
+        [ -n "$EXPECTED_HASH" ] || { echo "Failed to extract hash from checksum file" >&2; exit 1; }; \
+        ACTUAL_HASH=$(sha512sum proton-ge.tar.gz | awk '{print $1}') && \
+        [ "$EXPECTED_HASH" = "$ACTUAL_HASH" ] || { echo "Proton-GE checksum validation failed: expected $EXPECTED_HASH but got $ACTUAL_HASH" >&2; exit 1; }; \
+    fi; \
+    # Extract and normalize directory name
+    mkdir -p /opt && tar -xzf proton-ge.tar.gz -C /opt; \
+    PROTON_DIR=$(find /opt -maxdepth 1 -type d -name 'GE-Proton*' -print -quit); \
+    [ -n "$PROTON_DIR" ] && mv "$PROTON_DIR" /opt/ProtonGE || { echo "Failed to find extracted Proton-GE directory" >&2; exit 1; }; \
+    # Register tool for Steam - symlink avoids duplicating several GB
+    mkdir -p /usr/local/share/steam/compatibilitytools.d; \
+    rm -rf /usr/local/share/steam/compatibilitytools.d/ProtonGE 2>/dev/null || true; \
+    ln -s /opt/ProtonGE /usr/local/share/steam/compatibilitytools.d/ProtonGE; \
+    rm -rf /tmp/*
 
 # Proton Fix machine-id
-RUN         rm -f /etc/machine-id
-RUN         dbus-uuidgen --ensure=/etc/machine-id
-RUN         rm /var/lib/dbus/machine-id
-RUN         dbus-uuidgen --ensure
+RUN  rm -f /etc/machine-id
+RUN  dbus-uuidgen --ensure=/etc/machine-id
+RUN  rm -f /var/lib/dbus/machine-id
+RUN  dbus-uuidgen --ensure
 
 # -----------------------------
 # Pipx PATH setup (pipx installed via apt above)
@@ -115,24 +126,74 @@ RUN         dbus-uuidgen --ensure
 RUN python3 -m pipx ensurepath || true
 
 # Setup Protontricks
-RUN         pipx install protontricks
+RUN  pipx install protontricks
 
-# Set up Winetricks
-RUN	        wget -q -O /usr/local/bin/winetricks https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks \
-            && chmod +x /usr/local/bin/winetricks
+# -----------------------------
+# Winetricks installation (global)
+# -----------------------------
+RUN wget -q -O /usr/sbin/winetricks https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks && \
+    chmod +x /usr/sbin/winetricks && \
+    wget -q -O /usr/share/bash-completion/completions/winetricks \
+    https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks.bash-completion && \
+    rm -rf /tmp/*
 
+# Virtual display for headless Proton/Wine (xalia, SDL-based apps)
+ENV DISPLAY=:99
+ENV DISPLAY_WIDTH=1024
+ENV DISPLAY_HEIGHT=768
+ENV DISPLAY_DEPTH=24
 
 # -----------------------------
 # RCON CLI installation (latest, dynamisch)
 # -----------------------------
-RUN cd /tmp \
-    && RCON_URL=$(curl -s https://api.github.com/repos/gorcon/rcon-cli/releases/latest \
-        | grep browser_download_url | cut -d\" -f4 | grep 'amd64_linux\.tar\.gz') \
-    && curl -sLOJ "$RCON_URL" \
-    && tar xvf rcon-*-amd64_linux.tar.gz \
-    && mv rcon-*/rcon /usr/local/bin/ \
-    && rm -rf /tmp/*
-            
+# RCON CLI installation (latest release) - uses jq for reliable parsing
+RUN set -eux; cd /tmp; \
+    RCON_LATEST=$(curl -sSf https://api.github.com/repos/gorcon/rcon-cli/releases/latest 2>&1 | jq -r '.assets[] | select(.name | contains("amd64_linux")) | .browser_download_url' | head -n1) || true; \
+    if [ -n "$RCON_LATEST" ]; then \
+        curl -sSL "$RCON_LATEST" -o rcon.tar.gz && tar -xzf rcon.tar.gz && \
+        mv rcon-*-amd64_linux/rcon /usr/local/bin/ 2>/dev/null && chmod +x /usr/local/bin/rcon || true; \
+    fi; \
+    rm -rf /tmp/*
+
+# Provide a simple system-wide `proton` wrapper that launches the installed
+# Proton-GE. Create this as root (before switching to non-root user) so the
+# wrapper is owned by root and executable by all users.
+RUN set -eux; \
+    printf '%s\n' '#!/bin/bash' \
+        'set -euo pipefail' \
+        'if [ -d /opt/ProtonGE ]; then' \
+        '    PROTON_DIR=/opt/ProtonGE' \
+        'elif [ -d /usr/local/share/steam/compatibilitytools.d/ProtonGE ]; then' \
+        '    PROTON_DIR=/usr/local/share/steam/compatibilitytools.d/ProtonGE' \
+        'else' \
+        '    echo "Proton-GE not found (expected in /opt/ProtonGE or /usr/local/share/steam/compatibilitytools.d/ProtonGE)" >&2' \
+        '    exit 1' \
+        'fi' \
+        '' \
+        '# Common candidate locations for Proton launcher' \
+        'CANDIDATES=("$PROTON_DIR/proton" "$PROTON_DIR/proton.sh" "$PROTON_DIR/bin/proton" "$PROTON_DIR/dist/bin/proton" "$PROTON_DIR/x86_64/bin/proton")' \
+        'for p in "${CANDIDATES[@]}"; do' \
+        '    if [ -x "$p" ]; then' \
+        '        exec "$p" "$@"' \
+        '    fi' \
+        'done' \
+        '' \
+        '# Fallback: search for an executable named proton* within the Proton dir' \
+        'FOUND=$(find "$PROTON_DIR" -maxdepth 4 -type f -iname "proton*" -executable -print -quit 2>/dev/null || true)' \
+        'if [ -n "${FOUND:-}" ]; then' \
+        '    exec "${FOUND}" "$@"' \
+        'fi' \
+        '' \
+        '# If we reach here, no executable was found. Report helpful diagnostics.' \
+        'echo "Proton executable not found or not executable inside $PROTON_DIR" >&2' \
+        'echo "Contents (top-level):" >&2; ls -la "$PROTON_DIR" >&2 || true' \
+        'exit 1' \
+    > /usr/local/bin/proton; \
+    chmod 755 /usr/local/bin/proton
+
+# Pre-create X11 socket directory as root with sticky bit so Xvfb can run as non-root
+RUN mkdir -p /tmp/.X11-unix && chmod 1777 /tmp/.X11-unix
+
 # Setup user and working directory
 RUN         useradd -m -d /home/container -s /bin/bash container
 USER        container
