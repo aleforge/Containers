@@ -23,6 +23,7 @@ jobs:
             - debian
             - dotnet
             - proton
+            - proton-dev
             - ubuntu
             - proton8
     steps:
