@@ -85,14 +85,13 @@ ENV LC_ALL=en_US.UTF-8
 # -----------------------------
 # Proton-GE installation (global)
 # -----------------------------
+ARG PROTON_VERSION=GE-Proton11-1
 RUN set -eux; cd /tmp; \
-    # Fetch release JSON using curl (already installed in layer 1)
-    PROTON_JSON=$(curl -sSf https://api.github.com/repos/GloriousEggroll/proton-ge-custom/releases/latest 2>&1) || { echo "Failed to fetch Proton-GE releases" >&2; exit 1; }; \
-    # Extract .tar.gz URL using jq (installed in layer 1)
-    PROTON_URL=$(printf '%s' "$PROTON_JSON" | jq -r '.assets[].browser_download_url' 2>/dev/null | grep '\.tar\.gz$' | head -n1) || { echo "Failed to parse Proton-GE release JSON" >&2; exit 1; }; \
-    [ -n "$PROTON_URL" ] || { echo "No Proton-GE .tar.gz found in latest release" >&2; exit 1; }; \
-    # Extract checksum URL
-    PROTON_CHECKSUM_URL=$(printf '%s' "$PROTON_JSON" | jq -r '.assets[].browser_download_url' 2>/dev/null | grep '\.sha512sum$' | head -n1) || true; \
+    # Fetch pinned release (amd64 tarball only; aarch64 assets sort first in API responses)
+    PROTON_JSON=$(curl -sSf "https://api.github.com/repos/GloriousEggroll/proton-ge-custom/releases/tags/${PROTON_VERSION}" 2>&1) || { echo "Failed to fetch Proton-GE release ${PROTON_VERSION}" >&2; exit 1; }; \
+    PROTON_URL=$(printf '%s' "$PROTON_JSON" | jq -r '.assets[].browser_download_url' 2>/dev/null | grep '\.tar\.gz$' | grep -v aarch64 | head -n1) || { echo "Failed to parse Proton-GE release JSON" >&2; exit 1; }; \
+    [ -n "$PROTON_URL" ] || { echo "No amd64 Proton-GE .tar.gz found in release ${PROTON_VERSION}" >&2; exit 1; }; \
+    PROTON_CHECKSUM_URL=$(printf '%s' "$PROTON_JSON" | jq -r '.assets[].browser_download_url' 2>/dev/null | grep '\.sha512sum$' | grep -v aarch64 | head -n1) || true; \
     # Download Proton-GE tarball
     curl -sSL "$PROTON_URL" -o proton-ge.tar.gz || { echo "Failed to download Proton-GE from $PROTON_URL" >&2; exit 1; }; \
     [ -s proton-ge.tar.gz ] || { echo "Downloaded Proton-GE archive is empty" >&2; exit 1; }; \
