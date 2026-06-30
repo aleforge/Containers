@@ -44,7 +44,7 @@ export INTERNAL_IP
 echo -e "${BLUE}---------------------------------------------------------------------${NC}"
 echo -e "${RED}SteamCMD Proton Image${NC}"
 echo -e "${BLUE}---------------------------------------------------------------------${NC}"
-echo -e "${YELLOW}echo -e "${YELLOW}Linux Distribution: ${RED} $(. /etc/os-release ; echo $PRETTY_NAME)${NC}" $(cat /etc/debian_version)${NC}"
+echo -e "${YELLOW}Linux Distribution: ${RED} $(. /etc/os-release ; echo $PRETTY_NAME) $(cat /etc/debian_version)${NC}"
 echo -e "${YELLOW}Current timezone: ${RED} $(cat /etc/timezone)${NC}"
 echo -e "${GREEN}Maintained by AleForge.net${NC}"
 echo -e "${BLUE}---------------------------------------------------------------------${NC}"
@@ -71,6 +71,25 @@ fi
 
 # Switch to the container's working directory
 cd /home/container || exit 1
+
+# -----------------------------------------------------------------------------
+# NSS Wrapper Setup (Safe check for AleForge images)
+# -----------------------------------------------------------------------------
+# Fakes the /etc/passwd entry for the dynamic Pterodactyl container user.
+# Prevents C++ games (like Avorion) from crashing on getpwuid() checks.
+if [ -f "/usr/lib/x86_64-linux-gnu/libnss_wrapper.so" ]; then
+    export USER_ID=$(id -u)
+    export GROUP_ID=$(id -g)
+    export NSS_WRAPPER_PASSWD=/tmp/passwd
+    export NSS_WRAPPER_GROUP=/etc/group
+
+    # Create the mock passwd file using the current active user ID
+    echo "container:x:${USER_ID}:${GROUP_ID}:container:/home/container:/bin/bash" > ${NSS_WRAPPER_PASSWD}
+
+    # Load the NSS wrapper library
+    export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libnss_wrapper.so
+fi
+# -----------------------------------------------------------------------------
 
 ## just in case someone removed the defaults.
 if [ "${STEAM_USER}" == "" ]; then
