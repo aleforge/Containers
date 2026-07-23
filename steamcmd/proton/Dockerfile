@@ -26,26 +26,35 @@ RUN dpkg --add-architecture i386 && \
     ffmpeg \
     file \
     git \
+    gnupg \
+    gnupg2 \
+    gnutls-bin \
     iproute2 \
     jq \
+    libc6 \
     locales \
     numactl \
     mesa-utils \
     net-tools \
     netcat-openbsd \
     openssl \
+    pipx \
     pulseaudio \
     python3-full \
+    python3-pip \
+    python3-setuptools \
     python3-venv \
     steam-devices \
     tar \
     tini \
     wget \
     winbind \
+    xauth \
     xvfb \
     lib32gcc-s1 \
     libao-common \
     libasound2 \
+    libasound2-dev \
     libfreetype6 \
     libfreetype6:i386 \
     libsdl1.2debian \
@@ -55,6 +64,7 @@ RUN dpkg --add-architecture i386 && \
     libssl3 \
     libssl3:i386 \
     libgdiplus \
+    libncurses-dev:i386 \
     libncurses6 \
     libntlm0 \
     libnss-wrapper \
@@ -118,6 +128,13 @@ RUN  rm -f /etc/machine-id
 RUN  dbus-uuidgen --ensure=/etc/machine-id
 RUN  rm -f /var/lib/dbus/machine-id
 RUN  dbus-uuidgen --ensure
+
+# -----------------------------
+# Protontricks (parity with pelican yolks)
+# -----------------------------
+ENV PIPX_HOME=/opt/pipx
+ENV PIPX_BIN_DIR=/usr/local/bin
+RUN pipx install protontricks
 
 # -----------------------------
 # Winetricks installation (global)
