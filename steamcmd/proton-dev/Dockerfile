@@ -85,7 +85,7 @@ ENV LC_ALL=en_US.UTF-8
 # -----------------------------
 # Proton-GE installation (read-only template under /opt)
 # -----------------------------
-ARG PROTON_VERSION=GE-Proton11-1
+ARG PROTON_VERSION=GE-Proton11-3
 RUN set -eux; cd /tmp; \
     PROTON_JSON=$(curl -sSf "https://api.github.com/repos/GloriousEggroll/proton-ge-custom/releases/tags/${PROTON_VERSION}" 2>&1) || { echo "Failed to fetch Proton-GE release ${PROTON_VERSION}" >&2; exit 1; }; \
     PROTON_URL=$(printf '%s' "$PROTON_JSON" | jq -r '.assets[].browser_download_url' 2>/dev/null | grep '\.tar\.gz$' | grep -v aarch64 | head -n1) || { echo "Failed to parse Proton-GE release JSON" >&2; exit 1; }; \
@@ -125,6 +125,7 @@ ENV DISPLAY=:99
 ENV DISPLAY_WIDTH=1024
 ENV DISPLAY_HEIGHT=768
 ENV DISPLAY_DEPTH=24
+ENV PROTON_USE_XALIA=0
 
 # -----------------------------
 # RCON CLI installation (latest release)
@@ -180,7 +181,7 @@ WORKDIR     /home/container
 
 STOPSIGNAL  SIGINT
 
-COPY        --chown=container:container ./entrypoint.sh /entrypoint.sh
+COPY        --chown=container:container ./proton-dev/entrypoint.sh /entrypoint.sh
 RUN         chmod +x /entrypoint.sh
 ENTRYPOINT  ["/usr/bin/tini", "-g", "--"]
 CMD         ["/entrypoint.sh"]

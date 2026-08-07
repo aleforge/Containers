@@ -95,7 +95,7 @@ ENV LC_ALL=en_US.UTF-8
 # -----------------------------
 # Proton-GE installation (global)
 # -----------------------------
-ARG PROTON_VERSION=GE-Proton11-1
+ARG PROTON_VERSION=GE-Proton11-3
 RUN set -eux; cd /tmp; \
     # Fetch pinned release (amd64 tarball only; aarch64 assets sort first in API responses)
     PROTON_JSON=$(curl -sSf "https://api.github.com/repos/GloriousEggroll/proton-ge-custom/releases/tags/${PROTON_VERSION}" 2>&1) || { echo "Failed to fetch Proton-GE release ${PROTON_VERSION}" >&2; exit 1; }; \
@@ -146,10 +146,12 @@ RUN wget -q -O /usr/sbin/winetricks https://raw.githubusercontent.com/Winetricks
     rm -rf /tmp/*
 
 # Virtual display for headless Proton/Wine (xalia, SDL-based apps)
+# Entrypoint starts Xvfb on this display; PROTON_USE_XALIA=0 avoids SDL3 Xalia crashes.
 ENV DISPLAY=:99
 ENV DISPLAY_WIDTH=1024
 ENV DISPLAY_HEIGHT=768
 ENV DISPLAY_DEPTH=24
+ENV PROTON_USE_XALIA=0
 
 # -----------------------------
 # RCON CLI installation (latest, dynamisch)
@@ -210,7 +212,7 @@ WORKDIR     /home/container
 
 STOPSIGNAL  SIGINT
 
-COPY        --chown=container:container ./../entrypoint.sh /entrypoint.sh
+COPY        --chown=container:container ./entrypoint.sh /entrypoint.sh
 RUN         chmod +x /entrypoint.sh
 ENTRYPOINT  ["/usr/bin/tini", "-g", "--"]
 CMD         ["/entrypoint.sh"]
