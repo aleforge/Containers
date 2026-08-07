@@ -50,14 +50,14 @@ RUN             apt install -y --no-install-recommends \
                     libevent-dev \
                     libfluidsynth3 \
                     libfontconfig \
-                    libgcc1 \
+                    libgcc-s1 \
                     libicu74 \
                     liblua5.4-0 \
                     liblzo2-2 \
-                    libmariadbclient-dev-compat \
+                    libmariadb-dev-compat \
                     libncurses6:i386 \
                     libntlm0 \
-                    libprotobuf32 \
+                    libprotobuf32t64 \
                     libsdl1.2debian \
                     libsdl2-2.0-0 \
                     libsdl2-2.0-0:i386 \
@@ -65,7 +65,7 @@ RUN             apt install -y --no-install-recommends \
                     libstdc++6 \
                     libunwind8 \
                     libz-dev \
-                    libzip4
+                    libzip4t64
 
 RUN 			apt-get clean \
 				&& rm -rf /var/lib/apt/lists/*

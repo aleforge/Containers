@@ -9,7 +9,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 # Installing GraalVM JDK 24
 ARG GRAALVM_VERSION=24.0.2
-ARG GRAALVM_PKG=https://download.oracle.com/graalvm/21/latest/graalvm-jdk-21_linux-x64_bin.tar.gz 
+ARG GRAALVM_PKG=https://download.oracle.com/graalvm/24/latest/graalvm-jdk-24_linux-x64_bin.tar.gz 
 ARG GRAALVM_FOLDER_NAME=graalvm-community-openjdk-${GRAALVM_VERSION}
 
 RUN apt-get update -y \
