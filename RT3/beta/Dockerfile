@@ -10,7 +10,11 @@ LABEL       org.opencontainers.image.licenses=MIT
 RUN   useradd -m -d /home/container -s /bin/bash container
 
 ## update base packages
-RUN   apt update \
+## Debian 11 LTS ended 2026-08-31; disable leftover debian-security sources.
+RUN   find /etc/apt -type f \( -name '*.list' -o -name '*.sources' \) -exec sed -i \
+            -e '/debian-security/s/^/# /' {} + \
+        &&   printf 'Acquire::Check-Valid-Until "false";\n' > /etc/apt/apt.conf.d/99no-check-valid-until \
+        &&   apt update \
         &&   apt upgrade -y
 
 ## install dependencies
