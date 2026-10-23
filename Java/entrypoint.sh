@@ -20,8 +20,13 @@ echo -e "${BLUE}----------------------------------------------------------------
 echo -e "${YELLOW}Java Image from AleForge${NC}"
 echo -e "${RED}THIS IMAGE IS LICENSED UNDER AGPLv3${NC}"
 echo -e "${BLUE}---------------------------------------------------------------------${NC}"
-echo -e "${YELLOW}"${YELLOW}Linux Distribution: ${RED} $(. /etc/os-release ; echo $PRETTY_NAME)${NC}" $(cat /etc/debian_version)${NC}"
-echo -e "${YELLOW}Current timezone: $(cat /etc/timezone)${NC}"
+echo -e "${YELLOW}Linux Distribution: ${RED}$(. /etc/os-release ; echo "$PRETTY_NAME")${NC}"
+if [ -f /etc/timezone ]; then
+    CURRENT_TZ=$(tr -d '[:space:]' < /etc/timezone)
+else
+    CURRENT_TZ=${TZ}
+fi
+echo -e "${YELLOW}Current timezone: ${CURRENT_TZ}${NC}"
 echo -e "${YELLOW}Java Version:${NC} ${RED}$(java -version 2>&1)${NC}"
 echo -e "${BLUE}---------------------------------------------------------------------${NC}"
 

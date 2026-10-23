@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - Java/GraalVM/**
+      - Java/entrypoint.sh
+      - Java/distrust-emudhra.sh
   workflow_dispatch:
   schedule:
     - cron: "0 0 * * 1"
@@ -33,6 +35,8 @@ jobs:
           - jdk23
           - jdk24
           - jdk24-ee
+          - jdk25
+          - jdk25-ee
     steps:
       - uses: actions/checkout@v4
       - name: Set up QEMU

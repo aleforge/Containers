@@ -2,10 +2,12 @@ FROM        --platform=$TARGETOS/$TARGETARCH ibm-semeru-runtimes:open-11-jdk
 
 LABEL       author="AleForge Support" maintainer="support@mail.aleforge.net"
 LABEL       org.opencontainers.image.source="https://github.com/aleforge/containers/"
-LABEL       org.opencontainers.image.description="A Docker image to run OpenJDK 11 on AleForge Panel (https://panel.aleforge.net)" 
+LABEL       org.opencontainers.image.description="A Docker image to run Semeru JDK 11 on AleForge Panel (https://panel.aleforge.net)"
 
-RUN         apt update -y \
-            && apt install -y \
+ENV         DEBIAN_FRONTEND=noninteractive
+
+RUN         apt-get update \
+            && apt-get install -y --no-install-recommends \
                 curl \
                 lsof \
                 ca-certificates \
@@ -18,8 +20,18 @@ RUN         apt update -y \
                 iproute2 \
                 libfreetype6 \
                 tini \
-				zip \
-				unzip
+                zip \
+                unzip \
+                jq \
+            && apt-get upgrade -y \
+            && apt-get clean \
+            && rm -rf /var/lib/apt/lists/* \
+            && rm -f /usr/bin/dd /usr/bin/fallocate /usr/bin/truncate /usr/bin/xfs_mkfile
+
+COPY        ../../distrust-emudhra.sh /tmp/distrust-emudhra.sh
+RUN         chmod +x /tmp/distrust-emudhra.sh \
+            && /tmp/distrust-emudhra.sh \
+            && rm /tmp/distrust-emudhra.sh
 
 ## Setup user and working directory
 RUN         useradd -m -d /home/container -s /bin/bash container
@@ -29,6 +41,7 @@ WORKDIR     /home/container
 
 STOPSIGNAL SIGINT
 
-COPY        --chown=container:container ./../entrypoint.sh /entrypoint.sh
+COPY        --chown=container:container ../../entrypoint.sh /entrypoint.sh
 RUN         chmod +x /entrypoint.sh
-CMD         [ "/bin/bash", "/entrypoint.sh" ]
+ENTRYPOINT  ["/usr/bin/tini", "-g", "--"]
+CMD         ["/entrypoint.sh"]

@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - Java/OpenJDK/**
+      - Java/entrypoint.sh
+      - Java/distrust-emudhra.sh
   workflow_dispatch:
   schedule:
     - cron: "0 0 * * 1"
@@ -31,6 +33,7 @@ jobs:
           - 21j9
           - 22j9
           - 23j9
+          - 25j9
     steps:
       - uses: actions/checkout@v4
       - name: Set up QEMU

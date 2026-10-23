@@ -1,11 +1,13 @@
 FROM        --platform=$TARGETOS/$TARGETARCH eclipse-temurin:24-jdk-noble
 
-LABEL author="AleForge Support" maintainer="support@mail.aleforge.net"
-LABEL org.opencontainers.image.source="https://github.com/aleforge/containers/"
-LABEL org.opencontainers.image.description="A Docker image to run JDK 23 on AleForge Panel (https://panel.aleforge.net)" 
+LABEL       author="AleForge Support" maintainer="support@mail.aleforge.net"
+LABEL       org.opencontainers.image.source="https://github.com/aleforge/containers/"
+LABEL       org.opencontainers.image.description="A Docker image to run Temurin JDK 24 on AleForge Panel (https://panel.aleforge.net)"
 
-RUN         apt update -y \
-            && apt install -y \
+ENV         DEBIAN_FRONTEND=noninteractive
+
+RUN         apt-get update \
+            && apt-get install -y --no-install-recommends \
                 curl \
                 lsof \
                 ca-certificates \
@@ -18,17 +20,18 @@ RUN         apt update -y \
                 iproute2 \
                 libfreetype6 \
                 tini \
-				zip \
-				unzip \
-                && apt upgrade -y \
-                && apt clean \
-                && rm -rf /var/lib/apt/lists/*
+                zip \
+                unzip \
+                jq \
+            && apt-get upgrade -y \
+            && apt-get clean \
+            && rm -rf /var/lib/apt/lists/* \
+            && rm -f /usr/bin/dd /usr/bin/fallocate /usr/bin/truncate /usr/bin/xfs_mkfile
 
-RUN         rm -rf /usr/bin/dd \
-                && rm -rf /usr/bin/fallocate \
-                && rm -rf /usr/bin/truncate \
-                && rm -rf /usr/bin/xfs_mkfile
-
+COPY        ../../distrust-emudhra.sh /tmp/distrust-emudhra.sh
+RUN         chmod +x /tmp/distrust-emudhra.sh \
+            && /tmp/distrust-emudhra.sh \
+            && rm /tmp/distrust-emudhra.sh
 
 ## Setup user and working directory
 RUN         useradd -m -d /home/container -s /bin/bash container
@@ -38,7 +41,7 @@ WORKDIR     /home/container
 
 STOPSIGNAL SIGINT
 
-COPY        --chown=container:container ./../entrypoint.sh /entrypoint.sh
+COPY        --chown=container:container ../../entrypoint.sh /entrypoint.sh
 RUN         chmod +x /entrypoint.sh
-ENTRYPOINT    ["/usr/bin/tini", "-g", "--"]
+ENTRYPOINT  ["/usr/bin/tini", "-g", "--"]
 CMD         ["/entrypoint.sh"]

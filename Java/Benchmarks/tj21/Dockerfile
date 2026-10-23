@@ -1,11 +1,13 @@
-FROM        --platform=$TARGETOS/$TARGETARCH eclipse-temurin:21-jdk-jammy
+FROM        --platform=$TARGETOS/$TARGETARCH eclipse-temurin:21-jdk
 
 LABEL author="AleForge Support" maintainer="support@mail.aleforge.net"
 LABEL org.opencontainers.image.source="https://github.com/aleforge/containers/"
-LABEL org.opencontainers.image.description="A Docker image to run GraalVM JDK 21 on AleForge Panel (https://panel.aleforge.net)" 
+LABEL org.opencontainers.image.description="A Docker image to run Temurin JDK 21 benchmarks on AleForge Panel (https://panel.aleforge.net)"
 
-RUN         apt update -y \
-            && apt install -y \
+ENV         DEBIAN_FRONTEND=noninteractive
+
+RUN         apt-get update \
+            && apt-get install -y --no-install-recommends \
                 curl \
                 lsof \
                 ca-certificates \
@@ -18,11 +20,22 @@ RUN         apt update -y \
                 iproute2 \
                 libfreetype6 \
                 tini \
-				zip \
-				unzip \
+                zip \
+                unzip \
+                jq \
                 software-properties-common \
+                python3 \
                 python3-pip \
-                python-is-python3
+                python-is-python3 \
+            && apt-get upgrade -y \
+            && apt-get clean \
+            && rm -rf /var/lib/apt/lists/* \
+            && rm -f /usr/bin/dd /usr/bin/fallocate /usr/bin/truncate /usr/bin/xfs_mkfile
+
+COPY        ../../distrust-emudhra.sh /tmp/distrust-emudhra.sh
+RUN         chmod +x /tmp/distrust-emudhra.sh \
+            && /tmp/distrust-emudhra.sh \
+            && rm /tmp/distrust-emudhra.sh
 
 ## Setup user and working directory
 RUN         useradd -m -d /home/container -s /bin/bash container

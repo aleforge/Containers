@@ -1,51 +1,63 @@
-FROM --platform=$TARGETOS/$TARGETARCH amd64/debian
+FROM        --platform=$TARGETOS/$TARGETARCH debian:13-slim
 
-LABEL author="AleForge Support" maintainer="support@mail.aleforge.net"
-LABEL org.opencontainers.image.source="https://github.com/aleforge/containers/"
-LABEL org.opencontainers.image.description="A Docker image to run GraalVM EE JDK 8 on AleForge Panel (https://panel.aleforge.net)" 
+LABEL       author="AleForge Support" maintainer="support@mail.aleforge.net"
+LABEL       org.opencontainers.image.source="https://github.com/aleforge/containers/"
+LABEL       org.opencontainers.image.description="A Docker image to run GraalVM Enterprise JDK 8 on AleForge Panel (https://panel.aleforge.net)"
 
-# Linux things
-ARG DEBIAN_FRONTEND=noninteractive
+ENV         DEBIAN_FRONTEND=noninteractive
+ENV         LANG=en_US.UTF-8
+ENV         LANGUAGE=en_US:en
+ENV         LC_ALL=en_US.UTF-8
 
-# Installing GraalVM EE JDK 8
-ARG GRAALVM_VERSION=21.3.8
-ARG JAVA_VERSION=java8
-ARG GRAALVM_PKG=https://f000.backblazeb2.com/file/AleForge-public-Data/java/graalvm/graalvm-ee-${JAVA_VERSION}-linux-amd64-${GRAALVM_VERSION}.tar.gz
-#ARG GRAALVM_PKG=https://akticu.be/GraalVM/graalvm-ee-${JAVA_VERSION}-linux-amd64-${GRAALVM_VERSION}.tar.gz
-ARG GRAALVM_FOLDER_NAME=graalvm-ee-${JAVA_VERSION}-${GRAALVM_VERSION}
+RUN         apt-get update \
+            && apt-get install -y --no-install-recommends \
+                curl \
+                lsof \
+                ca-certificates \
+                openssl \
+                git \
+                tar \
+                sqlite3 \
+                fontconfig \
+                tzdata \
+                iproute2 \
+                libfreetype6 \
+                libstdc++6 \
+                tini \
+                zip \
+                unzip \
+                jq \
+                locales \
+            && apt-get upgrade -y \
+            && sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen \
+            && locale-gen \
+            && apt-get clean \
+            && rm -rf /var/lib/apt/lists/* \
+            && rm -f /usr/bin/dd /usr/bin/fallocate /usr/bin/truncate /usr/bin/xfs_mkfile
 
-RUN apt-get update -y \
-    && apt-get upgrade -y \
-    && apt-get install -y lsof curl ca-certificates openssl git tar sqlite3 fontconfig libfreetype6 tzdata iproute2 libstdc++6 locales locales-all font-manager
+# Frozen on GraalVM Enterprise 21.3.8. Classic EE 21.3.20.0.2 has no public URL without an Oracle download token.
+RUN         curl --retry 3 -LfsSo /tmp/graalvm.tar.gz "https://f000.backblazeb2.com/file/AleForge-public-Data/java/graalvm/graalvm-ee-java8-linux-amd64-21.3.8.tar.gz" \
+            && mkdir -p /opt/java/graalvm \
+            && tar -xzf /tmp/graalvm.tar.gz --strip-components=1 -C /opt/java/graalvm \
+            && rm /tmp/graalvm.tar.gz
 
-# Setting the language
-RUN echo "Setting the language..."
-ENV LANG='en_US.UTF-8'
-ENV LANGUAGE='en_US.UTF-8'
-ENV LC_ALL='en_US.UTF-8'
-RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
+ENV         JAVA_HOME=/opt/java/graalvm
+ENV         PATH=/opt/java/graalvm/bin:$PATH
 
-RUN echo ${GRAALVM_PKG}
-RUN cd /usr/local/ \
-    && echo "Downloading GraalVM EE..." && curl --retry 3 -Lfso /tmp/graalvm.tar.gz ${GRAALVM_PKG} \
-    && echo "Extracting GraalVM EE..." && tar -xzf /tmp/graalvm.tar.gz \
-    && echo "Delete temp file..." && rm /tmp/graalvm.tar.gz
+COPY        ../../distrust-emudhra.sh /tmp/distrust-emudhra.sh
+RUN         chmod +x /tmp/distrust-emudhra.sh \
+            && /tmp/distrust-emudhra.sh \
+            && rm /tmp/distrust-emudhra.sh
 
-RUN echo "Mooving GraalVM EE..." && mkdir /usr/local/graalvm && mv /usr/local/${GRAALVM_FOLDER_NAME}/* /usr/local/graalvm && rm -rf /usr/local/${GRAALVM_FOLDER_NAME}
+## Setup user and working directory
+RUN         useradd -m -d /home/container -s /bin/bash container
+USER        container
+ENV         USER=container HOME=/home/container
+WORKDIR     /home/container
 
-RUN echo "Setting GraalVM EE environment variables..."
-ENV JAVA_HOME=/usr/local/graalvm
-ENV PATH=/usr/local/graalvm/bin:${PATH}
+STOPSIGNAL SIGINT
 
-# Check if the installation was successful
-RUN java -version 
-
-# Pterodactyl things
-RUN useradd -d /home/container -m container
-
-USER container
-ENV USER=container HOME=/home/container
-WORKDIR /home/container
-
-COPY ./../entrypoint.sh /entrypoint.sh
-CMD [ "/bin/bash", "/entrypoint.sh" ]
+COPY        --chown=container:container ../../entrypoint.sh /entrypoint.sh
+RUN         chmod +x /entrypoint.sh
+ENTRYPOINT  ["/usr/bin/tini", "-g", "--"]
+CMD         ["/entrypoint.sh"]

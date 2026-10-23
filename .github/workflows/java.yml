@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - Java/temurin/**
+      - Java/entrypoint.sh
+      - Java/distrust-emudhra.sh
   workflow_dispatch:
   schedule:
     - cron: "0 0 * * 1"
@@ -27,6 +29,7 @@ jobs:
           - 17
           - 19
           - 21
+          - 22
           - 23
           - 24
           - 25

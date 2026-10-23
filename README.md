@@ -57,72 +57,90 @@ because these images are tuned to work with our platform and may not function ou
 - [`Debian`](/installers/debian)
   - `ghcr.io/aleforge/installer:debian`
 
-### [Java](/java)
+### [Java](/Java)
 
-#### [Temurin](/java/Temurin)
+`java-*` tags stay Eclipse Temurin. Other vendors have their own tags. Every Java image is Debian glibc, and each build removes the eMudhra roots tied to CVE-2026-91403 from that JDK's truststore.
 
-* [`java8`](/java/8)
-  * `ghcr.io/aleforge/containers:java-8`
-* [`java11`](/java/11)
-  * `ghcr.io/aleforge/containers:java-11`
-* [`java16`](/java/16)
-  * `ghcr.io/aleforge/containers:java-16`
-* [`java17`](/java/17)
-  * `ghcr.io/aleforge/containers:java-17`
-* [`java19`](/java/19)
-  * `ghcr.io/aleforge/containers:java-19`
-* [`java21`](/java/21)
-  * `ghcr.io/aleforge/containers:java-21`
-* [`java22`](/java/22)
-  * `ghcr.io/aleforge/containers:java-22`
-* [`java23`](/java/23)
-  * `ghcr.io/aleforge/containers:java-23`
-* [`java24`](/java/24)
-  * `ghcr.io/aleforge/containers:java-24`
-* [`java25`](/java/25)
-  * `ghcr.io/aleforge/containers:java-25`
+Current images are Java 8, 11, 17, 21, and 25. Older tags stay published and are frozen on their last vendor build.
 
-#### [GraalVM](/java/GraalVM)
+#### [Temurin](/Java/Temurin)
 
-- [`java8`](/GraalVM/jdk8-ee)
-  - `ghcr.io/aleforge/containers:graalvm-jdk8-ee`
-- [`java11`](/GraalVM/jdk11-ee)
-  - `ghcr.io/aleforge/containers:graalvm-jdk11-ee`
-  - `ghcr.io/aleforge/containers:graalvm-jdk11`
-- [`java17`](/GraalVM/jdk17-ee)
-  - `ghcr.io/aleforge/containers:graalvm-jdk17-ee`
-  - `ghcr.io/aleforge/containers:graalvm-jdk17`
-- [`java20`](/GraalVM/jdk20)
-  - `ghcr.io/aleforge/containers:graalvm-jdk20`
-- [`java21`](/GraalVM/jdk21)
-  - `ghcr.io/aleforge/containers:graalvm-jdk21`
-  - `ghcr.io/aleforge/containers:graalvm-jdk21-ee`
-- [`java22`](/GraalVM/jdk22)
-  - `ghcr.io/aleforge/containers:graalvm-jdk22`
-- [`java23`](/GraalVM/jdk23)
-  - `ghcr.io/aleforge/containers:graalvm-jdk23`
-- [`java24`](/GraalVM/jdk24)
-  - `ghcr.io/aleforge/containers:graalvm-jdk24`
-  - `ghcr.io/aleforge/containers:graalvm-jdk24-ee`
+Rebuilt from the Adoptium floating tags:
 
-#### [OpenJDK](/java/OpenJDK)
+* [`java-8`](/Java/temurin/8) — `ghcr.io/aleforge/containers:java-8` (`eclipse-temurin:8-jdk-jammy`)
+* [`java-11`](/Java/temurin/11) — `ghcr.io/aleforge/containers:java-11` (`eclipse-temurin:11-jdk-jammy`)
+* [`java-17`](/Java/temurin/17) — `ghcr.io/aleforge/containers:java-17`
+* [`java-21`](/Java/temurin/21) — `ghcr.io/aleforge/containers:java-21`
+* [`java-25`](/Java/temurin/25) — `ghcr.io/aleforge/containers:java-25`
 
-* [`java8`](/java/OpenJDK/8j9)
-  * `ghcr.io/aleforge/containers:java-8j9`
-* [`java11`](/java/OpenJDK/11j9)
-  * `ghcr.io/aleforge/containers:java-11j9`
-* [`java16`](/java/OpenJDK/16j9)
-  * `ghcr.io/aleforge/containers:java-16j9`
-* [`java17`](/java/OpenJDK/17j9)
-  * `ghcr.io/aleforge/containers:java-17j9`
-* [`java19`](/java/OpenJDK/19j9)
-  * `ghcr.io/aleforge/containers:java-19j9`
-* [`java21`](/java/OpenJDK/21j9)
-  * `ghcr.io/aleforge/containers:java-21j9`
-* [`java22`](/java/OpenJDK/22j9)
-  * `ghcr.io/aleforge/containers:java-22j9`
-* [`java23`](/java/OpenJDK/23j9)
-  * `ghcr.io/aleforge/containers:java-23j9`
+Frozen. These releases are out of support:
+
+* [`java-16`](/Java/temurin/16) — `ghcr.io/aleforge/containers:java-16`
+* [`java-19`](/Java/temurin/19) — `ghcr.io/aleforge/containers:java-19`
+* [`java-22`](/Java/temurin/22) — `ghcr.io/aleforge/containers:java-22`
+* [`java-23`](/Java/temurin/23) — `ghcr.io/aleforge/containers:java-23`
+* [`java-24`](/Java/temurin/24) — `ghcr.io/aleforge/containers:java-24`
+
+#### [Semeru](/Java/OpenJDK)
+
+`ibm-semeru-runtimes:open-<version>-jdk`:
+
+* [`java-8j9`](/Java/OpenJDK/8j9) — `ghcr.io/aleforge/containers:java-8j9`
+* [`java-11j9`](/Java/OpenJDK/11j9) — `ghcr.io/aleforge/containers:java-11j9`
+* [`java-17j9`](/Java/OpenJDK/17j9) — `ghcr.io/aleforge/containers:java-17j9`
+* [`java-21j9`](/Java/OpenJDK/21j9) — `ghcr.io/aleforge/containers:java-21j9`
+* [`java-25j9`](/Java/OpenJDK/25j9) — `ghcr.io/aleforge/containers:java-25j9`
+
+Frozen: [`java-16j9`](/Java/OpenJDK/16j9), [`java-18j9`](/Java/OpenJDK/18j9), [`java-19j9`](/Java/OpenJDK/19j9), [`java-22j9`](/Java/OpenJDK/22j9), [`java-23j9`](/Java/OpenJDK/23j9).
+
+#### [GraalVM](/Java/GraalVM)
+
+Community:
+
+* [`graalvm-jdk11`](/Java/GraalVM/jdk11) — `ghcr.io/aleforge/containers:graalvm-jdk11` (22.3.3, last community CPU)
+* [`graalvm-jdk17`](/Java/GraalVM/jdk17) — `ghcr.io/aleforge/containers:graalvm-jdk17` (17.0.9, last community CPU)
+* [`graalvm-jdk21`](/Java/GraalVM/jdk21) — `ghcr.io/aleforge/containers:graalvm-jdk21` (21.0.2, last community CPU)
+* [`graalvm-jdk25`](/Java/GraalVM/jdk25) — `ghcr.io/aleforge/containers:graalvm-jdk25` (Community 25 Innovation 4, JDK 25.0.4.1.1)
+
+Frozen community tags, with no newer community CPU: [`graalvm-jdk20`](/Java/GraalVM/jdk20), [`graalvm-jdk22`](/Java/GraalVM/jdk22), [`graalvm-jdk23`](/Java/GraalVM/jdk23), [`graalvm-jdk24`](/Java/GraalVM/jdk24).
+
+Oracle public `latest` URLs, so a weekly rebuild follows Oracle:
+
+* [`graalvm-jdk21-ee`](/Java/GraalVM/jdk21-ee) — `ghcr.io/aleforge/containers:graalvm-jdk21-ee`
+* [`graalvm-jdk24-ee`](/Java/GraalVM/jdk24-ee) — `ghcr.io/aleforge/containers:graalvm-jdk24-ee` (JDK 24 is out of support and will not gain the eMudhra fix)
+* [`graalvm-jdk25-ee`](/Java/GraalVM/jdk25-ee) — `ghcr.io/aleforge/containers:graalvm-jdk25-ee`
+
+Frozen until an Oracle download token is available. These stay on the existing Backblaze archives (Enterprise 21.3.8 for JDK 8, 22.3.4 for JDK 11 and 17):
+
+* [`graalvm-jdk8-ee`](/Java/GraalVM/jdk8-ee) — `ghcr.io/aleforge/containers:graalvm-jdk8-ee`
+* [`graalvm-jdk11-ee`](/Java/GraalVM/jdk11-ee) — `ghcr.io/aleforge/containers:graalvm-jdk11-ee`
+* [`graalvm-jdk17-ee`](/Java/GraalVM/jdk17-ee) — `ghcr.io/aleforge/containers:graalvm-jdk17-ee`
+
+#### [Amazon Corretto](/Java/corretto)
+
+* [`corretto-8`](/Java/corretto) — `ghcr.io/aleforge/containers:corretto-8`
+* [`corretto-11`](/Java/corretto) — `ghcr.io/aleforge/containers:corretto-11`
+* [`corretto-17`](/Java/corretto) — `ghcr.io/aleforge/containers:corretto-17`
+* [`corretto-21`](/Java/corretto) — `ghcr.io/aleforge/containers:corretto-21`
+* [`corretto-25`](/Java/corretto) — `ghcr.io/aleforge/containers:corretto-25`
+
+#### [Azul Zulu](/Java/zulu)
+
+JDK and JRE tags for 8, 11, 17, 21, and 25:
+
+* `ghcr.io/aleforge/containers:zulu-8` and `ghcr.io/aleforge/containers:zulu-8-jre`
+* `ghcr.io/aleforge/containers:zulu-11` and `ghcr.io/aleforge/containers:zulu-11-jre`
+* `ghcr.io/aleforge/containers:zulu-17` and `ghcr.io/aleforge/containers:zulu-17-jre`
+* `ghcr.io/aleforge/containers:zulu-21` and `ghcr.io/aleforge/containers:zulu-21-jre`
+* `ghcr.io/aleforge/containers:zulu-25` and `ghcr.io/aleforge/containers:zulu-25-jre`
+
+#### [Liberica](/Java/liberica)
+
+* [`liberica-8`](/Java/liberica) — `ghcr.io/aleforge/containers:liberica-8`
+* [`liberica-11`](/Java/liberica) — `ghcr.io/aleforge/containers:liberica-11`
+* [`liberica-17`](/Java/liberica) — `ghcr.io/aleforge/containers:liberica-17`
+* [`liberica-21`](/Java/liberica) — `ghcr.io/aleforge/containers:liberica-21`
+* [`liberica-25`](/Java/liberica) — `ghcr.io/aleforge/containers:liberica-25`
 
 ### [MariaDB](/mariadb)
 
