@@ -20,6 +20,7 @@ RUN         apt update -y \
                 tini \
 				zip \
 				unzip \
+                jq \
                 && apt upgrade -y \
                 && apt clean \
                 && rm -rf /var/lib/apt/lists/*
@@ -29,6 +30,10 @@ RUN         rm -rf /usr/bin/dd \
                 && rm -rf /usr/bin/truncate \
                 && rm -rf /usr/bin/xfs_mkfile
 
+COPY        ../../distrust-emudhra.sh /tmp/distrust-emudhra.sh
+RUN         chmod +x /tmp/distrust-emudhra.sh \
+                && /tmp/distrust-emudhra.sh \
+                && rm /tmp/distrust-emudhra.sh
 
 ## Setup user and working directory
 RUN         useradd -m -d /home/container -s /bin/bash container
