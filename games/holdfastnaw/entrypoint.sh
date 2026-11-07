@@ -9,7 +9,12 @@ pushd holdfastnaw-dedicated/configs/
 if [ -f "$SERVER_CONFIG_PATH" ]; then
 	echo "Found configuration file - replacing variables"
 	sed -i "s/^server_name .*/server_name $(printf '%s\n' "$SERVER_NAME" | sed -e 's/[\/&]/\\&/g')/g" "$SERVER_CONFIG_PATH"
-	sed -i "s/^maximum_players .*/maximum_players $(printf '%s\n' "$PLAYERS" | sed -e 's/[\/&]/\\&/g')/g" "$SERVER_CONFIG_PATH"
+	# maximum_players is set per map rotation. An empty MAX_SLOTS value must not wipe those lines.
+	if [ -n "$MAX_SLOTS" ]; then
+		sed -i "s/^maximum_players .*/maximum_players $(printf '%s\n' "$MAX_SLOTS" | sed -e 's/[\/&]/\\&/g')/g" "$SERVER_CONFIG_PATH"
+	else
+		echo "MAX_SLOTS is empty - leaving maximum_players unchanged"
+	fi
 	sed -i "s/^server_welcome_message .*/server_welcome_message $(printf '%s\n' "$MOTD" | sed -e 's/[\/&]/\\&/g')/g" "$SERVER_CONFIG_PATH"
 	sed -i "s/^server_region .*/server_region $(printf '%s\n' "$REGION" | sed -e 's/[\/&]/\\&/g')/g" "$SERVER_CONFIG_PATH"
 	sed -i "s/^server_admin_password .*/server_admin_password $(printf '%s\n' "$ADMIN_PASS" | sed -e 's/[\/&]/\\&/g')/g" "$SERVER_CONFIG_PATH"
